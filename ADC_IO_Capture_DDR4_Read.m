@@ -11,7 +11,7 @@ DDR4_ReadLen = CaptureSize;
 % Debug mode:
 % If set to true, we capture counter data which is a ramp from 1 to N
 % If false we capture ADC data
-DebugMode = 1; 
+DebugMode = 0; 
 
 %% AXI4 Stream IIO Write 
 AXI4SReadObj = pspshared.libiio.axistream.read(...
