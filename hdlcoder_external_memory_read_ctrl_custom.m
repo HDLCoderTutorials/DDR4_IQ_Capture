@@ -6,24 +6,27 @@ function [valid_out, count_out, ddr_read_done, rd_addr, rd_len, rd_avalid,Toggle
 
 %   Copyright 2017 The MathWorks, Inc.
 
-% create persistent variables (registers)
-persistent rstate burst_stop burst_count
-if isempty(rstate)
-    rstate      = fi(0, 0, 4, 0);
-    burst_stop  = uint32(0);
-    burst_count = uint32(0);
-    debug_state = cast(0,'like',rstate);
-end
-
-% state Memory Encoding
+%% state machine encoding
 IDLE               = fi(0, 0, 4, 0);
 READ_BURST_START   = fi(1, 0, 4, 0);
 READ_BURST_REQUEST = fi(2, 0, 4, 0);
 DATA_COUNT         = fi(3, 0, 4, 0);
 
-ToggleTLAST = false;
+%% counter settings
+fm = coder.const(fimath('RoundingMethod','Floor','OverflowAction','Wrap'));
+u32dt = coder.const(numerictype(0,32,0));
 
-% state machine logic
+%% create persistent variables (registers)
+persistent rstate burst_stop burst_count
+if isempty(rstate)
+    rstate      = IDLE;
+    burst_stop  = fi(0, u32dt, fm);
+    burst_count = fi(0, u32dt, fm);
+end
+debug_state = rstate;
+
+%% state machine logic
+ToggleTLAST = false;
 switch (rstate)
     case IDLE
         % output to AXI4 Master
@@ -37,8 +40,8 @@ switch (rstate)
         ddr_read_done = true;
         
         % State vars
-        burst_stop  = uint32(burst_len);
-        burst_count = uint32(0);
+        burst_stop(:)  = burst_len;
+        burst_count(:) = 0;
         
         if start
             rstate(:) = READ_BURST_START;
@@ -105,7 +108,7 @@ switch (rstate)
         
         % State vars
         if ( rd_dvalid )
-            burst_count = uint32(burst_count + 1);
+            burst_count(:) = burst_count + 1;
         end
         
         if ( burst_count == burst_stop )
@@ -130,8 +133,6 @@ switch (rstate)
         
         rstate(:) = IDLE;
 end
-
-debug_state(:) = rstate;
 
 end
 

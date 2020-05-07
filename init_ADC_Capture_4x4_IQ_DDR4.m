@@ -13,7 +13,7 @@ incrScale = (2^N)/Fs;
 incr = round(Fo*incrScale/4); % phase increment
 
 
-CPILength = 3; % pulses per CPI
+CPILength = 4; % pulses per CPI
 pulseLength = 16; % samples per pulse
 rngGateLength = 30; % samples to ignore after Tx start
 rngCaptureLength = 50;
@@ -27,5 +27,7 @@ DDRDataWidth = 128;
 DDRDataType = fixdt(0,DDRDataWidth,0);
 DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
 
-%% Sim params
-stoptime = DDRDepth + CaptureLength*2.5;
+%% Sim parameters
+sim_CaptureLength = CaptureLength;
+sim_RdFrameSize = 64;
+sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
