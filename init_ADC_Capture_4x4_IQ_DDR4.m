@@ -11,3 +11,21 @@ N = 14;    % accum WL
 Fs = 1/Ts;      
 incrScale = (2^N)/Fs;
 incr = round(Fo*incrScale/4); % phase increment
+
+
+CPILength = 3; % pulses per CPI
+pulseLength = 16; % samples per pulse
+rngGateLength = 30; % samples to ignore after Tx start
+rngCaptureLength = 50;
+pulsePeriod = rngGateLength+rngCaptureLength;
+
+CaptureLength = CPILength*rngCaptureLength;
+
+%% DDR plant model param
+DDRDepth = 1024;
+DDRDataWidth = 128;
+DDRDataType = fixdt(0,DDRDataWidth,0);
+DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
+
+%% Sim params
+stoptime = DDRDepth + CaptureLength*2.5;
