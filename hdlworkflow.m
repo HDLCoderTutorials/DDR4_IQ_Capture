@@ -1,6 +1,6 @@
 %--------------------------------------------------------------------------
 % HDL Workflow Script
-% Generated with MATLAB 9.7 (R2019b) at 00:55:33 on 27/03/2020
+% Generated with MATLAB 9.7 (R2019b) at 23:20:46 on 12/05/2020
 % This script was generated using the following parameter values:
 %     Filename  : 'D:\MY_DATA\HDL_projects\DDR4_IQ_Capture\hdlworkflow.m'
 %     Overwrite : true
@@ -116,20 +116,20 @@ hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_SelectCh', 'IOInterface', 'AXI4
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_SelectCh', 'IOInterfaceMapping', 'x"11C"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/TriggerCapture', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/TriggerCapture', 'IOInterfaceMapping', 'x"100"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPIStart', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPIStart', 'IOInterfaceMapping', 'x"100"');
 
 % Set Inport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DebugCaptureRegister', 'IOInterface', 'AXI4');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DebugCaptureRegister', 'IOInterfaceMapping', 'x"108"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureSize', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureSize', 'IOInterfaceMapping', 'x"104"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureLength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureLength', 'IOInterfaceMapping', 'x"104"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadLength', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadLength', 'IOInterfaceMapping', 'x"10C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadFrameLen', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadFrameLen', 'IOInterfaceMapping', 'x"10C"');
 
 % Set Inport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadAddress', 'IOInterface', 'AXI4');

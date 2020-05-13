@@ -21,16 +21,16 @@ setup(AXI4SWriteObj,fi(zeros(1024,1),numerictype('ufix128')));
 ADC_SelectCh =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('11C')); 
-TriggerCapture =  pspshared.libiio.aximm.write(...
+CPIStart =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('100')); 
 DebugCaptureRegister =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('108')); 
-ADC_CaptureSize =  pspshared.libiio.aximm.write(...
+ADC_CaptureLength =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('104')); 
-DDR4_ReadLength =  pspshared.libiio.aximm.write(...
+DDR4_ReadFrameLen =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('10C')); 
 DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
@@ -103,10 +103,10 @@ setup(AXI4_AckLow_Count);
 setup(AXI4_CaptureFIFONum); 
 % Setup AXI4MM Write IIO objects
 setup(ADC_SelectCh,uint32(0)); 
-setup(TriggerCapture,boolean(0)); 
+setup(CPIStart,boolean(0)); 
 setup(DebugCaptureRegister,boolean(0)); 
-setup(ADC_CaptureSize,uint32(0)); 
-setup(DDR4_ReadLength,uint32(0)); 
+setup(ADC_CaptureLength,uint32(0)); 
+setup(DDR4_ReadFrameLen,uint32(0)); 
 setup(DDR4_ReadAddress,uint32(0)); 
 setup(DDR4_ReadTrigger,boolean(0)); 
 setup(NCO_Incr,uint16(0)); 
@@ -128,10 +128,10 @@ setup(NCO_Incr,uint16(0));
 % step(AXI4_CaptureFIFONum); 
 % ---- Step AXI4MM Write IIO objects ---- 
 % step(ADC_SelectCh,uint32(0)); 
-% step(TriggerCapture,boolean(0)); 
+% step(CPIStart,boolean(0)); 
 % step(DebugCaptureRegister,boolean(0)); 
-% step(ADC_CaptureSize,uint32(0)); 
-% step(DDR4_ReadLength,uint32(0)); 
+% step(ADC_CaptureLength,uint32(0)); 
+% step(DDR4_ReadFrameLen,uint32(0)); 
 % step(DDR4_ReadAddress,uint32(0)); 
 % step(DDR4_ReadTrigger,boolean(0)); 
 % step(NCO_Incr,uint16(0)); 
