@@ -12,6 +12,7 @@ classdef RadarSetup < handle
     end
     
     properties
+        is_validated = false % ?
         is_calculated = false % Have input parameters be rounded and converted to integer sample delays?
         rfsoc_clock_rates % object containing fpga clock rate and sample rate, in Hz
         pulses_per_cpi % Sets the number of contiguous pulses to capture in memeory per CPI trigger.
@@ -21,7 +22,7 @@ classdef RadarSetup < handle
         range_delay_m % Start of range swath. Must be greater delay than the pulse width.
 
 
-        sample_delay_struct % Structure with output delays in samples.
+        radar_pl_configuration % Object with config parameters for programable logic.
 
     end
 
@@ -31,13 +32,22 @@ classdef RadarSetup < handle
 
     
     methods
-        function obj = RadarSetup(fpga_clock_rate_hz,sample_rate_hz)
+        function obj = RadarSetup(varargin)
             %RFSoC_Clock_Settings Construct an instance of this class
             %   Detailed explanation goes here
-            import behavior; % Should import behavior package
+%             import behavior; % Should import behavior package
 
-            obj.fpga_clock_rate_hz = fpga_clock_rate_hz;
-            obj.sample_rate_hz = sample_rate_hz;
+            % Needs parameter based inputs
+
+
+        end
+        
+        function set.prf_hz(obj,prf_hz_)
+            obj.pri_sec = 1/prf_hz;
+        end
+        
+        function prf_hz_value = get.prf_hz(obj)
+           prf_hz_value = 1/obj.pri_sec; 
         end
         
         function valid = isInputValid(obj)
