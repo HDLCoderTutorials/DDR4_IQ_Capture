@@ -11,7 +11,7 @@ DDR4_ReadLen = CaptureSize;
 % Debug mode:
 % If set to true, we capture counter data which is a ramp from 1 to N
 % If false we capture ADC data
-DebugMode = 1; 
+DebugMode = 0; 
 
 %% AXI4 Stream IIO Write 
 AXI4SReadObj = pspshared.libiio.axistream.read(...
@@ -33,7 +33,11 @@ hScope = dsp.TimeScope(1, Fs,...
                     'AxesScaling', 'Manual',...
                     'YLimits', YScale,...
                     'LayoutDimensions', [1 1]);
+hSpecAn = dsp.SpectrumAnalyzer( ...
+                    'SampleRate', Fs);
 frmWrk = hScope.getFramework;
+addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
+frmWrk = hSpecAn.getFramework;
 addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
 
 %% AXI4 MM IIO Write registers
@@ -198,6 +202,7 @@ while ~done
     end
 	
     hScope(data); % Plot data
+    hSpecAn(data);
     frameIdx = frameIdx + 1;
     
     PrintDiagnostics(DiagnosticRd)
