@@ -11,6 +11,7 @@ classdef Radar_pl_configuration < handle
         
         
     end
+        
     
     methods
         function obj = Radar_pl_configuration(pulse_width_cycles)
@@ -36,18 +37,66 @@ classdef Radar_pl_configuration < handle
             assert(numel(obj.sample_rate_hz) == 1,'sample_rate_hz must be a single element.');
         end
         
+        function defined = isPropertyDefined(obj,propertyName)
+            defined = true; % Default
+            propertyName = convertStringsToChars(propertyName);
+            props = properties(obj);
+            if ismember(propertyName,props)
+                propertyValue = obj.(propertyName);
+                if isempty(propertyValue)
+                    defined = false;
+                    warning([propertyName,' is not defined.']);
+                end
+            else % property not found
+                defined = false;
+                warning([propertyName,' is not a member of this class.']);
+            end
+        end
+        
+        % TODO: Fix bugs and cleanup this nest of if statements
+        function singleton = isPropertySingleton(obj,propertyName)
+            singleton = true; % Default
+            propertyName = convertStringsToChars(propertyName);
+            props = properties(obj);
+            if ismember(propertyName,props)
+                propertyValue = obj.(propertyName);
+                if ~isPropertyDefined(propetyName)
+                    singleton = false;
+                elseif ~(numel(obj.(propertyName)) == 1)
+                    singleton = false;
+                    warning([propertyName,' is not singleton.']);
+                    
+                end
+            else % property not found
+                singleton = false;
+                warning([propertyName,' is not a member of this class.']);
+            end
+        end        
+        
+        
         function defined = allPropertiesAreDefined(obj) 
             defined = true;
             props = properties(obj);            
             for iprop = 1:length(props)
               thisprop = props{iprop};
+              %thisprop_value = obj.(thisprop);
+              defined = defined & obj.isPropertyDefined(thisprop);              
+            end
+        end        
+        
+        function singleton = allPropertiesAreSingleton(obj) 
+            singleton = true;
+            props = properties(obj);            
+            for iprop = 1:length(props)
+              thisprop = props{iprop};
               thisprop_value = obj.(thisprop);
-              if isempty(thisprop_value)
-                 defined = false;
+              if ~(numel(obj.sample_rate_hz) == 1)
+                 singleton = false;
                  warning([thisprop,' must be defined.']);
               end              
             end
         end
+        
         
     end
 end
