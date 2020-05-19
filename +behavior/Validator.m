@@ -60,17 +60,24 @@ classdef (Abstract) Validator < handle
               singleton = singleton & obj.isPropertySingleton(thisprop);
             end
         end
+        
+        function valid = isValid(obj)
+            % isValid validate before use
+            valid = obj.allPropertiesAreSingletonAndDefined();
+        end
 
         function parseConstructorInputForClassProperties(obj,varargin)
             % Parse varargin for constructor to find name/value pairs for all class properties.
             parseObj = inputParser; % Class for handling varargin parsing.
             % Initialize parser targeting all class properties
             props = properties(obj);
+%             props = obj.getIndependentNonconstantNonhiddenProperties();
             for iprop = 1:length(props)
                 thisprop = props(iprop);
                 parseObj.addParameter(thisprop{1},[]);
             end
             parseObj.KeepUnmatched = true;
+            parseObj.PartialMatching = false; % Neat feature, but promotes sloppy code.
             parseObj.parse(varargin{:})
             % Assign object properties with values.
             for iprop = 1:length(props)
@@ -91,6 +98,29 @@ classdef (Abstract) Validator < handle
                 end
                 error('Remove input parameters which do not match class properties.')
             end
+        end
+
+        function dependentPropertiesCellArray = getDependentProperties(obj)
+            % Return cell array of dependent properties
+           myClass = class(obj)
+           mc = [];
+           eval(['mc=?',myClass,';'])
+           propertyNames = {mc.PropertyList.Name};
+           dependentLogicalArray = [mc.PropertyList.Dependent];
+           dependentPropertiesCellArray = propertyNames(dependentLogicalArray);            
+        end        
+        
+        function independentPropertiesCellArray = getIndependentNonconstantNonhiddenProperties(obj)
+            % Return cell array of independent, non-constant, non-hidden properties
+           myClass = class(obj)
+           mc = [];
+           eval(['mc=?',myClass,';'])
+           propertyNames = {mc.PropertyList.Name};
+           dependentLogicalArray = [mc.PropertyList.Dependent];
+           constantLogicalArray = [mc.PropertyList.Constant];
+           hiddenLogicalArray = [mc.PropertyList.Hidden];
+           independentPropertiesCellArray ...
+               = propertyNames(~dependentLogicalArray & ~constantLogicalArray & ~hiddenLogicalArray);            
         end
 
     end

@@ -1,4 +1,4 @@
-classdef RadarSetup < handle
+classdef RadarSetup < handle & behavior.Validator
     %RadarSetup Takes desired radar settings and calculates pulse delays.
     %   Calculate all state machine, ADC, DAC delays in terms of sample delays.
     %   Provide basic validation, as well as estimate of the data rate and 
@@ -34,16 +34,15 @@ classdef RadarSetup < handle
     methods
         function obj = RadarSetup(varargin)
             %RFSoC_Clock_Settings Construct an instance of this class
-            %   Detailed explanation goes here
-%             import behavior; % Should import behavior package
-
-            % Needs parameter based inputs
-
-
+            % Constructor accepts name/value pairs for all properties,
+            % or can be called without arguments for an empty object.
+            if (nargin>0)
+                obj.parseConstructorInputForClassProperties(varargin{:});
+            end
         end
         
         function set.prf_hz(obj,prf_hz_)
-            obj.pri_sec = 1/prf_hz;
+            obj.pri_sec = 1/prf_hz_;
         end
         
         function prf_hz_value = get.prf_hz(obj)
@@ -57,18 +56,23 @@ classdef RadarSetup < handle
             %   Otherwise, provides a helpful error message.
 
             % Validate rfsoc_clock object
-            assert(isa(clocks,'behavior.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type behavior.RFSoC_Clock_Settings'); 
-            assert(rfsoc_clock_rates.isValid,'rfsoc_clock_rates object reported invalid settings.'); 
+            assert(isa(rfsoc_clock_rates,'behavior.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type behavior.RFSoC_Clock_Settings'); 
+            assert(rfsoc_clock_rates.isValid,'rfsoc_clock_rates object reported invalid settings.');
+            
+            % Validate Radar programable logic configuration
+            assert(isa(radar_pl_configuration,'behavior.Radar_pl_configuration'),'radar_pl_configuration must be object of type behavior.Radar_pl_configuration'); 
+            assert(radar_pl_configuration.isValid,'radar_pl_configuration object reported invalid settings.');            
             
                       
-            % Assert that all properties are defined
-            assert(~isempty(obj.fpga_clock_rate_hz),'fpga_clock_rate_hz must be defined.');
-            assert(~isempty(obj.sample_rate_hz),'sample_rate_hz must be defined.');
-            
-            
-            % Assert that all properties are singleton
-            assert(numel(obj.fpga_clock_rate_hz) == 1,'fpga_clock_rate_hz must be a single element.');
-            assert(numel(obj.sample_rate_hz) == 1,'sample_rate_hz must be a single element.');
+            assert(obj.allPropertiesAreSingletonAndDefined(),'Not all properties are both defined and singleton.')
+%             % Assert that all properties are defined
+%             assert(~isempty(obj.fpga_clock_rate_hz),'fpga_clock_rate_hz must be defined.');
+%             assert(~isempty(obj.sample_rate_hz),'sample_rate_hz must be defined.');
+%             
+%             
+%             % Assert that all properties are singleton
+%             assert(numel(obj.fpga_clock_rate_hz) == 1,'fpga_clock_rate_hz must be a single element.');
+%             assert(numel(obj.sample_rate_hz) == 1,'sample_rate_hz must be a single element.');
 
             % Valid if we get to this line without errors.
             valid = true;
