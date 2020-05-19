@@ -60,29 +60,36 @@ classdef (Abstract) Validator < handle
               singleton = singleton & obj.isPropertySingleton(thisprop);
             end
         end
-        
-        function valid = isValid(obj)
-            % isValid validate before use
-            valid = obj.allPropertiesAreSingletonAndDefined();
-        end
 
         function parseConstructorInputForClassProperties(obj,varargin)
             % Parse varargin for constructor to find name/value pairs for all class properties.
+            % Excludes hidden and constant class properties. Special
+            % assignment handling is provided for dependent properties.
             parseObj = inputParser; % Class for handling varargin parsing.
-            % Initialize parser targeting all class properties
-            props = properties(obj);
-%             props = obj.getIndependentNonconstantNonhiddenProperties();
+            % Initialize parser targeting class properties.
+            props = obj.getNonconstantNonhiddenProperties();
             for iprop = 1:length(props)
                 thisprop = props(iprop);
                 parseObj.addParameter(thisprop{1},[]);
             end
             parseObj.KeepUnmatched = true;
-            parseObj.PartialMatching = false; % Neat feature, but promotes sloppy code.
+            % PartialMatchingNeat is neat, but promotes sloppy code. Setting to false
+            % forces using exact property names, or throws an error.
+            parseObj.PartialMatching = false;
             parseObj.parse(varargin{:})
-            % Assign object properties with values.
+            % Assign object properties with parsed values.
+            dependentProperties = obj.getDependentProperties();
             for iprop = 1:length(props)
                thisprop = props{iprop};
-               obj.(thisprop) = parseObj.Results.(thisprop);
+               parsedValue = parseObj.Results.(thisprop);
+               % Only make the assignment IF thisprop is notDependent OR
+               % parsedValue is not empty [] (not default)
+               % This prevents calculation errors in set methods, and blank
+               % dependent properties overwriting their independent
+               % counterpart.
+               if ~ismember(thisprop,dependentProperties) || ~isempty(parsedValue)
+                obj.(thisprop) = parsedValue;
+               end
             end
             % Check for unmatched field names
             fieldNames = fieldnames(parseObj.Unmatched);
@@ -100,27 +107,41 @@ classdef (Abstract) Validator < handle
             end
         end
 
+        function metaPropertyObject = getMetaPropertyObject(thisObject)
+           % Return meta.property object for class of specified object.
+           % Useful for determining which class properties are hidden,
+           % constant, dependent, etc. to support handling them
+           % differently.
+           myClass = class(thisObject);
+           metaPropertyObject = [];
+           eval(['metaPropertyObject=?',myClass,';']) % get meta.property object
+        end
+
         function dependentPropertiesCellArray = getDependentProperties(obj)
-            % Return cell array of dependent properties
-           myClass = class(obj)
-           mc = [];
-           eval(['mc=?',myClass,';'])
+           % Return cell array of dependent properties
+           mc = obj.getMetaPropertyObject;
            propertyNames = {mc.PropertyList.Name};
            dependentLogicalArray = [mc.PropertyList.Dependent];
-           dependentPropertiesCellArray = propertyNames(dependentLogicalArray);            
-        end        
-        
+           dependentPropertiesCellArray = propertyNames(dependentLogicalArray);
+        end
+
         function independentPropertiesCellArray = getIndependentNonconstantNonhiddenProperties(obj)
-            % Return cell array of independent, non-constant, non-hidden properties
-           myClass = class(obj)
-           mc = [];
-           eval(['mc=?',myClass,';'])
+           % Return cell array of independent, non-constant, non-hidden properties
+           mc = obj.getMetaPropertyObject;
            propertyNames = {mc.PropertyList.Name};
            dependentLogicalArray = [mc.PropertyList.Dependent];
            constantLogicalArray = [mc.PropertyList.Constant];
            hiddenLogicalArray = [mc.PropertyList.Hidden];
            independentPropertiesCellArray ...
-               = propertyNames(~dependentLogicalArray & ~constantLogicalArray & ~hiddenLogicalArray);            
+               = propertyNames(~dependentLogicalArray & ~constantLogicalArray & ~hiddenLogicalArray);
+        end
+
+        function parsedPropertyCell = getNonconstantNonhiddenProperties(obj)
+           % Return cell array of independent, non-constant, non-hidden properties
+           mc = obj.getMetaPropertyObject;
+           propertyNames = {mc.PropertyList.Name};
+           % Logical indexing for non-constant non-hidden properties
+           parsedPropertyCell = propertyNames( ~[mc.PropertyList.Constant] & ~[mc.PropertyList.Hidden] );
         end
 
     end
