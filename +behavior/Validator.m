@@ -61,6 +61,38 @@ classdef (Abstract) Validator < handle
             end
         end
 
+        function parseConstructorInputForClassProperties(obj,varargin)
+            % Parse varargin for constructor to find name/value pairs for all class properties.
+            parseObj = inputParser; % Class for handling varargin parsing.
+            % Initialize parser targeting all class properties
+            props = properties(obj);
+            for iprop = 1:length(props)
+                thisprop = props(iprop);
+                parseObj.addParameter(thisprop{1},[]);
+            end
+            parseObj.KeepUnmatched = true;
+            parseObj.parse(varargin{:})
+            % Assign object properties with values.
+            for iprop = 1:length(props)
+               thisprop = props{iprop};
+               obj.(thisprop) = parseObj.Results.(thisprop);
+            end
+            % Check for unmatched field names
+            fieldNames = fieldnames(parseObj.Unmatched);
+            if numel(fieldNames) > 0
+                for iUnmatched = 1:length(fieldNames)
+                   warning([fieldNames{iUnmatched}, ' is not a valid class property.']);
+                end
+                % Show Valid class properties
+                disp('**** Valid Class Properties ****')
+                for iprop = 1:length(props)
+                   thisprop = props{iprop};
+                   disp(thisprop);
+                end
+                error('Remove input parameters which do not match class properties.')
+            end
+        end
+
     end
 end
 
