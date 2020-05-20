@@ -1,8 +1,8 @@
 
-clear
+%%clear
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
-CaptureSize = 100e3;
+CaptureSize = CaptureLength;
 incrScale = 2^14/512e6; % Used to adjust NCO frequency
 Fs = 512e6; % 500 MHz for the ADC
 
@@ -156,7 +156,7 @@ setup(NCO_incr_AXI,uint16(incrScale*80e6));
 step(ADC_SelectCh,0); 
 % NCO values
 
-NcoTone = 0; 
+NcoTone = 20; 
 step(NCO_incr_AXI,uint16(incrScale*NcoTone)); %set NCO value
 % Capture settings
 % StreamEn(1); % enable stream
