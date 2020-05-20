@@ -13,7 +13,7 @@ classdef RFSoC_Clock_Settings < handle & behavior.Validator
         % Constructor accepts name/value pairs for all properties,
         % or can be called without arguments for an empty object.
             if (nargin>0)
-                obj.parseConstructorInputForClassProperties(varargin{:});
+                obj.parseConstructorInputForClassProperties(varargin);
             end
         end
 

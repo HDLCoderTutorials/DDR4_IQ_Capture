@@ -7,17 +7,13 @@ classdef RadarSetup < handle & behavior.Validator
     %   Eventually could provide plots to illustrate timing and pulse characteristics.
 
     properties (Hidden,Constant)
-        c = 3e8
+        c = 299792458
         % These properties are not required inputs for producing pl_config.
-        generatedProperties = {'radar_pl_configuration','blindRange','cpi_data_bits','cpi_data_bits_per_second'}
+        outputProperties = {'radar_pl_configuration'}
     end
 
     properties (Hidden)
         originalInputs % For when parameters are changed during rounding
-        is_calculated = false % Have input parameters be rounded and converted to integer sample delays?
-        blindRange
-        cpi_data_bits
-        cpi_data_bits_per_second
     end
 
     properties
@@ -35,14 +31,14 @@ classdef RadarSetup < handle & behavior.Validator
         prf_hz % Calculate PRI in steps from this value.
     end
 
-
+    
     methods
         function obj = RadarSetup(varargin)
             %RFSoC_Clock_Settings Construct an instance of this class
             % Constructor accepts name/value pairs for all properties,
             % or can be called without arguments for an empty object.
             if (nargin>0)
-                obj.parseConstructorInputForClassProperties(varargin{:});
+                obj.parseConstructorInputForClassProperties(varargin,'exclude',obj.outputProperties);
             end
         end
 
@@ -63,45 +59,78 @@ classdef RadarSetup < handle & behavior.Validator
             %   Returns true if properties are all defined, and if
             %   their magnitude and relationship is reasonable.
             %   Otherwise, provides a helpful error message.
+            
+            % Problem: Assert throws an error and halts execution.  It
+            % would be more helpful to throw an error after displaying
+            % warnings for ALL issues which fail validation.
 
+            % Validate all properties except those excluded.
+            assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),'Not all properties are both defined and singleton.')
+            
             % Validate rfsoc_clock object
             assert(isa(obj.rfsoc_clock_rates,'behavior.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type behavior.RFSoC_Clock_Settings');
             assert(obj.rfsoc_clock_rates.isValid,'rfsoc_clock_rates object reported invalid settings.');
 
-            % Validate Radar programable logic configuration
-            assert(isa(obj.radar_pl_configuration,'behavior.Radar_pl_configuration'),'radar_pl_configuration must be object of type behavior.Radar_pl_configuration');
-            assert(obj.radar_pl_configuration.isValid,'radar_pl_configuration object reported invalid settings.');
+            % Validate Radar programable logic configuration object
+            % (This is for output, so it doesn't need validation)
+%             assert(isa(obj.radar_pl_configuration,'behavior.Radar_pl_configuration'),'radar_pl_configuration must be object of type behavior.Radar_pl_configuration');
+%             assert(obj.radar_pl_configuration.isValid,'radar_pl_configuration object reported invalid settings.');
 
 
-            assert(obj.allPropertiesAreSingletonAndDefined(),'Not all properties are both defined and singleton.')
-%             % Assert that all properties are defined
-%             assert(~isempty(obj.fpga_clock_rate_hz),'fpga_clock_rate_hz must be defined.');
-%             assert(~isempty(obj.sample_rate_hz),'sample_rate_hz must be defined.');
-%
-%
-%             % Assert that all properties are singleton
-%             assert(numel(obj.fpga_clock_rate_hz) == 1,'fpga_clock_rate_hz must be a single element.');
-%             assert(numel(obj.sample_rate_hz) == 1,'sample_rate_hz must be a single element.');
 
             % Valid if we get to this line without errors.
             valid = true;
 
         end
-
-        function valid = isOutputValid(obj)
-
-
-        end
-
+       
         function valid = isPulseTimingValid(obj)
            valid = true;
-           warning('No validation logic exists')
+           warning('No validation logic exists for the plot method')
         end
 
+        function performanceParameters = getRadarPerformance(obj)
+            % Calculate Radar performance parameters
+            warning('These calculatioins have not been verified')
+            % Should validate that required properties have been defined
+%             assert(obj.allPropertiesAreSingletonAndDefined('include',{'pri_sec','pulse_width_sec'}) && ...
+%                 obj.allPropertiesAreDefined('include',{'rfsoc_clock_rates'}) && obj.rfsoc_clock_rates.isValid(), ...
+%             'Additional parameters must be defined before calculation is possible.');
+            % Intermediate parameters
+            recoveryTime = 0;            
+            samplesPerPulse = obj.pulse_width_sec * obj.rfsoc_clock_rates.sample_rate_hz;
+            bitsPerSample = 32; % Complex Samples
+            % Generate outputs
+            performanceParameters.blindRange = (obj.c * (obj.pri_sec + recoveryTime))/2;
+            performanceParameters.cpi_data_bits = samplesPerPulse * bitsPerSample;
+            performanceParameters.cpi_data_bits_per_second = performanceParameters.cpi_data_bits * obj.prf_hz;
+        end
+        
+        function radar_pl_config = getRadarPlConfig(obj)
+           % Calculate Programable Logic radar configuration parameters
+           % from class properties. Validate integrity of inputs and
+           % outputs before and after calculations.
+           % Round parameters as needed to fit limitations 
+           % of Programable Logic.
+           warning('getRadarPlConfig calculations are NOT complete. Proof of concept only.')
+           
+           assert(obj.isInputValid(),'Input parameters are not sufficient ')
+           
+           samplesPerClockCycles = obj.rfsoc_clock_rates.sample_rate_hz / obj.rfsoc_clock_rates.fpga_clock_rate_hz;           
+           radar_pl_config = behavior.Radar_pl_configuration(...
+               'pulse_width_cycles',100,'tx_delay_cycles',100,...
+                'adc_rx_samples',1000,'after_rx_pri_delay_cycles',200, ...
+                'samples_per_clock_cycle',round(samplesPerClockCycles));
+            
+            assert(radar_pl_config.isValid(),'Radar Programable Logic Configuration object is not valid')           
+        end
+        
         function plot(obj)
             % Provide pulse timing illustration
+            %
+            % I think this implementation is a bit ineficcient and silly
+            
             assert(obj.isPulseTimingValid(),'Pulse timing is not realizable, cannot plot.')
-
+            
             normalizedMax = 1000;
             time = 1:normalizedMax;
             tx_pulse = zeros(size(time));
