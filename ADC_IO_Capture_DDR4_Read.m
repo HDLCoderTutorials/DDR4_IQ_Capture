@@ -3,8 +3,6 @@
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
 CaptureSize = CaptureLength;
-incrScale = 2^14/512e6; % Used to adjust NCO frequency
-Fs = 512e6; % 500 MHz for the ADC
 
 DDR4_ReadLen = CaptureSize;
 
@@ -62,25 +60,36 @@ AXI4_DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
 AXI4_DDR4_ReadTrigger =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('114')); 
-% NCO Registers for scale and tone frequency
-% NOTE: Scale values are set to ufix8_en7 data types. To represent the
-% correct data format, pass this fixed-point data type value
-
-AXI4_NCO_Incr =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('118')); 
 AXI4_CPILength =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('120')); 
-AXI4_pulseLength =  pspshared.libiio.aximm.write(...
+AXI4_PulseWidth =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('124')); 
-AXI4_pulsePeriod =  pspshared.libiio.aximm.write(...
+AXI4_PRI =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('128')); 
-AXI4_rngGateLength =  pspshared.libiio.aximm.write(...
+AXI4_RngGateDelay =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('12C')); 
+AXI4_NCO_incr =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('118')); 
+AXI4_NCO_DAC_I_Gain =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('130')); 
+AXI4_NCO_DAC_Q_Gain =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('134')); 
+AXI4_NCO_end_incr =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('138')); 
+AXI4_NCO_step_value =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('140')); 
+AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('13C')); 
 
 
 %% AXI4 MM IIO Read debug registers
@@ -159,18 +168,27 @@ setup(AXI4_ADC_CaptureLength,uint32(0));
 setup(AXI4_DDR4_ReadFrameLen,uint32(0)); 
 setup(AXI4_DDR4_ReadAddress,uint32(0)); 
 setup(AXI4_DDR4_ReadTrigger,boolean(0)); 
-setup(AXI4_NCO_Incr,uint16(incrScale*80e6)); 
 setup(AXI4_CPILength,uint32(0)); 
-setup(AXI4_pulseLength,uint32(0)); 
-setup(AXI4_pulsePeriod,uint32(0)); 
-setup(AXI4_rngGateLength,uint32(0)); 
+setup(AXI4_PulseWidth,uint32(0)); 
+setup(AXI4_PRI,uint32(0)); 
+setup(AXI4_RngGateDelay,uint32(0)); 
+setup(AXI4_NCO_incr,int32(0)); 
+setup(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
+setup(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
+setup(AXI4_NCO_end_incr,int32(0)); 
+setup(AXI4_NCO_step_value,int32(0)); 
+setup(AXI4_RngSwathLength,uint32(0));
 
 %% Step() AXI4 MM IIO Objects - non-zero initial values
 % Channel Select
 step(AXI4_ADC_SelectCh,0); 
-% NCO values
-NcoTone = 20; 
-step(AXI4_NCO_Incr,uint16(incrScale*NcoTone)); %set NCO value
+% NCO values 
+AXI4_NCO_Incr(start_inc);
+AXI4_NCO_end_incr(end_inc);
+AXI4_NCO_step_value(LFM_counter_inc);
+
+AXI4_NCO_DAC_I_Gain(1);
+AXI4_NCO_DAC_Q_Gain(1);
 
 AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
 AXI4_ADC_CaptureLength(CaptureSize);% setup frame-size
@@ -180,9 +198,10 @@ AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Sin
 AXI4_DDR4_ReadTrigger(false); % do not trigger
 % Radar parameters
 AXI4_CPILength(CPILength);
-AXI4_pulseLength(pulseLength);
-AXI4_pulsePeriod(pulsePeriod);
-AXI4_rngGateLength(rngGateLength);
+AXI4_PulseWidth(PulseWidth_count);
+AXI4_PRI(PRI_count);
+AXI4_RngGateDelay(RngGateDelay_count);
+AXI4_RngSwathLength(RngSwathLength_count);
 
 %% Capture loop
 disp('Close the scope to stop the example...');
