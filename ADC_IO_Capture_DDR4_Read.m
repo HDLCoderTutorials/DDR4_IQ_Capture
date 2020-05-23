@@ -183,7 +183,7 @@ setup(AXI4_RngSwathLength,uint32(0));
 % Channel Select
 step(AXI4_ADC_SelectCh,0); 
 % NCO values 
-AXI4_NCO_Incr(start_inc);
+AXI4_NCO_incr(start_inc);
 AXI4_NCO_end_incr(end_inc);
 AXI4_NCO_step_value(LFM_counter_inc);
 
@@ -219,14 +219,6 @@ while ~done
    % in some version depending on address TriggerCapture was mapped to
    % TriggerCapture(1); % Trigger capture into DDR4 Memory
    % TriggerCapture(0);
-
-    if mod(frameIdx,ToneUpdateRate) == 0 
-        NcoTone = mod(NcoTone + 10,150); %incr by 10 Mhz to 150 Mhz then loop back
-        NcoTone = NcoTone+10;
-        AXI4_Tone_Wr = l_ComputeTone(NcoTone,incrScale);
-        step(AXI4_NCO_Incr,AXI4_Tone_Wr); % update tone
-        fprintf('Changing tone to %f \n',NcoTone);
-    end
 
     AXI4_DDR4_ReadTrigger(1); % Read data out of DDR4
     AXI4_DDR4_ReadTrigger(0);     
