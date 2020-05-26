@@ -132,12 +132,12 @@ classdef (Abstract) Validator < handle
             for iprop = 1:length(props)
                thisprop = props{iprop};
                parsedValue = parseObj.Results.(thisprop);
-               % Only make the assignment IF thisprop is notDependent OR
+               % Only make the assignment IF 
                % parsedValue is not empty [] (not default)
                % This prevents calculation errors in set methods, and blank
                % dependent properties overwriting their independent
                % counterpart.
-               if ~ismember(thisprop,dependentProperties) || ~isempty(parsedValue)
+               if ~isempty(parsedValue)
                 obj.(thisprop) = parsedValue;
                end
             end
