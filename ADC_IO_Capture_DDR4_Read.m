@@ -187,8 +187,8 @@ AXI4_NCO_incr(start_inc);
 AXI4_NCO_end_incr(end_inc);
 AXI4_NCO_step_value(LFM_counter_inc);
 
-AXI4_NCO_DAC_I_Gain(1);
-AXI4_NCO_DAC_Q_Gain(1);
+AXI4_NCO_DAC_I_Gain(.5);
+AXI4_NCO_DAC_Q_Gain(.5);
 
 AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
 AXI4_ADC_CaptureLength(CaptureSize);% setup frame-size
@@ -240,17 +240,13 @@ while ~done
     frameIdx = frameIdx + 1;
     
     PrintDiagnostics(DiagnosticRd)
-	
+    
+	pause(1);
 end
 
 
 release(AXI4SReadObj)
 % StreamEn(0) % disable stream
-
-
-function output = l_ComputeTone(NcoTone,incrScale)
-    output = uint16(NcoTone*1e6 * incrScale);
-end
 
 function PrintDiagnostics(DiagnosticRd)
     disp('------------- Diagnostic Read -------------')

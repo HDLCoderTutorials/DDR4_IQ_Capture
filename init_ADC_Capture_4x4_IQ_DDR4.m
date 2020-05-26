@@ -17,8 +17,8 @@ fpga_Ts = 1/fpga_clk_rate;
 CPILength = 4; % pulses per CPI
 PRF = 100000; %Hz
 PulseWidth = 5e-6; % seconds
-RngGateDelay = 540/fpga_clk_rate; % time in seconds to delay after Tx start before Rx start
-RngSwathLength = 1024/fpga_clk_rate; % time in seconds of RX data to save each pulse
+RngGateDelay = 1/fpga_clk_rate; % time in seconds to delay after Tx start before Rx start
+RngSwathLength = PulseWidth; % time in seconds of RX data to save each pulse, for now set to match PulseWidth
 
 %% CHIRP parameters
 
