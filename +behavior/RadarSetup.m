@@ -56,23 +56,23 @@ classdef RadarSetup < handle & behavior.Validator
         
         
         function set.chirp_bandwidth_hz(obj,chirp_bandwidth_value)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Both Defined
                center_freq_hz = obj.chirp_center_frequency_hz; 
                 obj.chirp_start_frequency_hz = center_freq_hz - chirp_bandwidth_value/2;
                 obj.chirp_stop_frequency_hz  = center_freq_hz + chirp_bandwidth_value/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Neither Defined
                 obj.chirp_start_frequency_hz = -chirp_bandwidth_value/2;
                 obj.chirp_stop_frequency_hz  = chirp_bandwidth_value/2;
             else % One defined, either start or stop frequency
-                if obj.isPropertySingleton('chirp_start_frequency_hz') 
+                if obj.isPropertySingleton('chirp_start_frequency_hz',false) 
                     % Only start frequency is defined, calculate the stop
                     obj.chirp_stop_frequency_hz  = obj.chirp_start_frequency_hz ...
                         + chirp_bandwidth_value;
-                elseif obj.isPropertySingleton('chirp_stop_frequency_hz')
+                elseif obj.isPropertySingleton('chirp_stop_frequency_hz',false)
                     % Only the stop frequency is defined, calculate the start
                     obj.chirp_start_frequency_hz = obj.chirp_stop_frequency_hz ...
                         - chirp_bandwidth_value;
@@ -83,12 +83,12 @@ classdef RadarSetup < handle & behavior.Validator
         end
 
         function chirp_bandwidth_value = get.chirp_bandwidth_hz(obj)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Both Defined
                 chirp_bandwidth_value = (obj.chirp_stop_frequency_hz - obj.chirp_start_frequency_hz);
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Neither Defined
                 chirp_bandwidth_value = [];
             else % One defined, either start or stop frequency
@@ -97,16 +97,16 @@ classdef RadarSetup < handle & behavior.Validator
         end
 
         function set.chirp_center_frequency_hz(obj,chirp_center_frequency_hz_value)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Both Defined
-                chirp_bandwidth_hz = obj.chirp_bandwidth_hz;
+                chirp_bandwidth_hz_value = obj.chirp_bandwidth_hz;
                 obj.chirp_start_frequency_hz = chirp_center_frequency_hz_value ...
-                    - chirp_bandwidth_hz/2;
+                    - chirp_bandwidth_hz_value/2;
                 obj.chirp_stop_frequency_hz  = chirp_center_frequency_hz_value ...
-                    + chirp_bandwidth_hz/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz'))
+                    + chirp_bandwidth_hz_value/2;
+            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Neither Defined
                 chirp_bandwidth_value = 100e3; % Arbitrary default value.
                 obj.chirp_start_frequency_hz = chirp_center_frequency_hz_value ...
@@ -114,13 +114,13 @@ classdef RadarSetup < handle & behavior.Validator
                 obj.chirp_stop_frequency_hz  = chirp_center_frequency_hz_value ...
                     + chirp_bandwidth_value/2;
             else % One defined, either start or stop frequency
-                if obj.isPropertySingleton('chirp_start_frequency_hz') 
+                if obj.isPropertySingleton('chirp_start_frequency_hz',false) 
                     % Only start frequency is defined, calculate the stop
                     chirp_bandwidth_value = 2*( chirp_center_frequency_hz_value ...
                         - obj.chirp_start_frequency_hz);
                     obj.chirp_stop_frequency_hz  = obj.chirp_start_frequency_hz ...
                         + chirp_bandwidth_value;
-                elseif obj.isPropertySingleton('chirp_stop_frequency_hz')
+                elseif obj.isPropertySingleton('chirp_stop_frequency_hz',false)
                     % Only the stop frequency is defined, calculate the start
                     chirp_bandwidth_value = 2*( chirp_center_frequency_hz_value ...
                         - obj.chirp_start_frequency_hz);
@@ -133,12 +133,12 @@ classdef RadarSetup < handle & behavior.Validator
         end
 
         function chirp_center_frequency_hz_value = get.chirp_center_frequency_hz(obj)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Both Defined
                 chirp_center_frequency_hz_value = (obj.chirp_stop_frequency_hz + obj.chirp_start_frequency_hz)/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz') && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz'))
+            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
+                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
                 % Neither Defined
                 chirp_bandwidth_value = [];
             else % One defined, either start or stop frequency

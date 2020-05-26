@@ -4,7 +4,8 @@ classdef (Abstract) Validator < handle
 
     methods
 
-        function defined = isPropertyDefined(obj,propertyName)
+        function defined = isPropertyDefined(obj,propertyName,showErrors)
+            if ~exist('showErrors','var'); showErrors = true; end
             defined = true; % Default
             propertyName = convertStringsToChars(propertyName);
             props = properties(obj);
@@ -12,31 +13,32 @@ classdef (Abstract) Validator < handle
                 propertyValue = obj.(propertyName);
                 if isempty(propertyValue)
                     defined = false;
-                    warning([propertyName,' is not defined.']);
+                    if showErrors; warning([propertyName,' is not defined.']); end
                 end
             else % property not found
                 defined = false;
-                warning([propertyName,' is not a member of this class.']);
+                if showErrors; warning([propertyName,' is not a member of this class.']); end
             end
         end
 
         % All checks are negations, failure modes.
         % When the condition is true, the rest of the conditions are not
         % checked.
-        function singleton = isPropertySingleton(obj,propertyName)
+        function singleton = isPropertySingleton(obj,propertyName,showErrors)
+            if ~exist('showErrors','var'); showErrors = true; end
             singleton = true; % Default
             propertyName = convertStringsToChars(propertyName);
             props = properties(obj);
             if ~ismember(propertyName,props) % property not found
                 singleton = false;
-                warning([propertyName,' is not a member of this class.']);
+                if showErros; warning([propertyName,' is not a member of this class.']); end
             else
                 % propertyValue = obj.(propertyName);
-                if ~obj.isPropertyDefined(propertyName) % property not defined
+                if ~obj.isPropertyDefined(propertyName,showErrors) % property not defined
                     singleton = false;
                 elseif ~(numel(obj.(propertyName)) == 1) % property not singleton
                     singleton = false;
-                    warning([propertyName,' is not singleton.']);
+                    if showErrors; warning([propertyName,' is not singleton.']); end
                 end
             end
         end

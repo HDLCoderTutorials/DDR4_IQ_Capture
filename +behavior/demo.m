@@ -73,12 +73,13 @@ pl_config.isValid()
 % which may be sufficent.  When other parameters are requested they could be
 % gathered from their hidden properties and returned as a structure.
 
-% Test property filtering with arrayfun and discriminatorFcn
+%% Test property filtering with arrayfun and discriminatorFcn
 props = radarSetup.getNonconstantNonhiddenProperties();
 discriminatorFcn = radarSetup.getDiscriminator('exclude',{'radar_pl_configuration'})
 props = props(arrayfun(discriminatorFcn,props))
 
-
+%%
+r = behavior.RadarSetup('chirp_start_frequency_hz',0,'chirp_bandwidth_hz',100e6)
 
 
 
