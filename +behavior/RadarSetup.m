@@ -192,13 +192,19 @@ classdef RadarSetup < handle & behavior.Validator
 %                 obj.allPropertiesAreDefined('include',{'rfsoc_clock_rates'}) && obj.rfsoc_clock_rates.isValid(), ...
 %             'Additional parameters must be defined before calculation is possible.');
             % Intermediate parameters
-            recoveryTime = 0;            
-            samplesPerPulse = obj.pulse_width_sec * obj.rfsoc_clock_rates.sample_rate_hz;
+            recoveryTime = 0;      
+            ADC_sample_sec = (obj.pulse_width_sec + obj.range_swath_m / obj.c); % Pulse width time + range swath time
+            samplesPerPulse = ADC_sample_sec  * obj.rfsoc_clock_rates.sample_rate_hz;
             bitsPerSample = 32; % Complex Samples
             % Generate outputs
             performanceParameters.blindRange = (obj.c * (obj.pri_sec + recoveryTime))/2;
-            performanceParameters.cpi_data_bits = samplesPerPulse * bitsPerSample;
-            performanceParameters.cpi_data_bits_per_second = performanceParameters.cpi_data_bits * obj.prf_hz;
+            pulse_data_bits = samplesPerPulse * bitsPerSample;
+            cpi_data_bits = pulse_data_bits * obj.pulses_per_cpi;
+            cpi_data_bits_per_second = samplesPerPulse * bitsPerSample * obj.prf_hz;                                    
+            
+            performanceParameters.pulse_data_KB = pulse_data_bits /8/1e3;
+            performanceParameters.cpi_data_MB = cpi_data_bits/8/1e6;
+            performanceParameters.cpi_data_MB_per_second = cpi_data_bits_per_second /8/1e6;
         end
         
         function radar_pl_config = getRadarPlConfig(obj)
