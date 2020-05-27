@@ -1,10 +1,8 @@
 
-clear
+%%clear
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
-CaptureSize = 100e3;
-incrScale = 2^14/512e6; % Used to adjust NCO frequency
-Fs = 512e6; % 500 MHz for the ADC
+CaptureSize = CaptureLength;
 
 DDR4_ReadLen = CaptureSize;
 
@@ -41,35 +39,58 @@ frmWrk = hSpecAn.getFramework;
 addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
 
 %% AXI4 MM IIO Write registers
-TriggerCapture =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('100')); 
-DebugCaptureRegister =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('108')); 
-ADC_CaptureSize =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('104')); 
-DDR4_ReadLength =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('10C')); 
-DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('110')); 
-DDR4_ReadTrigger =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('114')); 
-ADC_SelectCh =  pspshared.libiio.aximm.write(...
+AXI4_ADC_SelectCh =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('11C')); 
-%% NCO Register
-% NCO Registers for scale and tone frequency
-% NOTE: Scale values are set to ufix8_en7 data types. To represent the
-% correct data format, pass this fixed-point data type value
-
-NCO_incr_AXI =  pspshared.libiio.aximm.write(...
+AXI4_CPIStart =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('100')); 
+AXI4_DebugCaptureRegister =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('108')); 
+AXI4_ADC_CaptureLength =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('104')); 
+AXI4_DDR4_ReadFrameLen =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('10C')); 
+AXI4_DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('110')); 
+AXI4_DDR4_ReadTrigger =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('114')); 
+AXI4_CPILength =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('120')); 
+AXI4_PulseWidth =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('124')); 
+AXI4_PRI =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('128')); 
+AXI4_RngGateDelay =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('12C')); 
+AXI4_NCO_incr =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('118')); 
+AXI4_NCO_DAC_I_Gain =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('130')); 
+AXI4_NCO_DAC_Q_Gain =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('134')); 
+AXI4_NCO_end_incr =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('138')); 
+AXI4_NCO_step_value =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('140')); 
+AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('13C')); 
+
 
 %% AXI4 MM IIO Read debug registers
 AXI4_S2MM_TreadyLowCount = pspshared.libiio.aximm.read(...
@@ -140,32 +161,47 @@ setup(AXI4_WastedWriteCycles);
 setup(AXI4_AckLow_Count); 
 setup(AXI4_CaptureFIFONum); 
 % Setup AXI4MM Write IIO objects
-setup(TriggerCapture,boolean(0)); 
-setup(DebugCaptureRegister,boolean(0)); 
-setup(ADC_CaptureSize,uint32(0)); 
-setup(DDR4_ReadLength,uint32(0)); 
-setup(DDR4_ReadAddress,uint32(0)); 
-setup(DDR4_ReadTrigger,boolean(0)); 
-% setup(StreamEn,boolean(0)); 
-setup(ADC_SelectCh,uint32(0)); 
-setup(NCO_incr_AXI,uint16(incrScale*80e6)); 
-
+setup(AXI4_ADC_SelectCh,uint32(0)); 
+setup(AXI4_CPIStart,boolean(0)); 
+setup(AXI4_DebugCaptureRegister,boolean(0)); 
+setup(AXI4_ADC_CaptureLength,uint32(0)); 
+setup(AXI4_DDR4_ReadFrameLen,uint32(0)); 
+setup(AXI4_DDR4_ReadAddress,uint32(0)); 
+setup(AXI4_DDR4_ReadTrigger,boolean(0)); 
+setup(AXI4_CPILength,uint32(0)); 
+setup(AXI4_PulseWidth,uint32(0)); 
+setup(AXI4_PRI,uint32(0)); 
+setup(AXI4_RngGateDelay,uint32(0)); 
+setup(AXI4_NCO_incr,int32(0)); 
+setup(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
+setup(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
+setup(AXI4_NCO_end_incr,int32(0)); 
+setup(AXI4_NCO_step_value,int32(0)); 
+setup(AXI4_RngSwathLength,uint32(0));
 
 %% Step() AXI4 MM IIO Objects - non-zero initial values
 % Channel Select
-step(ADC_SelectCh,0); 
-% NCO values
+step(AXI4_ADC_SelectCh,0); 
+% NCO values 
+AXI4_NCO_incr(start_inc);
+AXI4_NCO_end_incr(end_inc);
+AXI4_NCO_step_value(LFM_counter_inc);
 
-NcoTone = 0; 
-step(NCO_incr_AXI,uint16(incrScale*NcoTone)); %set NCO value
-% Capture settings
-% StreamEn(1); % enable stream
-DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
-ADC_CaptureSize(CaptureSize);% setup frame-size
+AXI4_NCO_DAC_I_Gain(.5);
+AXI4_NCO_DAC_Q_Gain(.5);
+
+AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
+AXI4_ADC_CaptureLength(CaptureSize);% setup frame-size
 % DDR4 Read settings
-DDR4_ReadLength(DDR4_ReadLen); 
-DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
-DDR4_ReadTrigger(false); % do not trigger
+AXI4_DDR4_ReadFrameLen(DDR4_ReadLen); 
+AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
+AXI4_DDR4_ReadTrigger(false); % do not trigger
+% Radar parameters
+AXI4_CPILength(CPILength);
+AXI4_PulseWidth(PulseWidth_count);
+AXI4_PRI(PRI_count);
+AXI4_RngGateDelay(RngGateDelay_count);
+AXI4_RngSwathLength(RngSwathLength_count);
 
 %% Capture loop
 disp('Close the scope to stop the example...');
@@ -175,19 +211,17 @@ ToneUpdateRate = 5; % Change tone every 40 frames
 prevLostSampleCount = 0;
 
 while ~done
-    TriggerCapture(1); % Trigger capture into DDR4 Memory
-    TriggerCapture(0);
+   
+   AXI4_CPIStart(1);
+   AXI4_CPIStart(0);
+   % The two lines below have been incorrect since we design was modified
+   % for CPI's and radar pulses updated to CPIStart above, may have worked
+   % in some version depending on address TriggerCapture was mapped to
+   % TriggerCapture(1); % Trigger capture into DDR4 Memory
+   % TriggerCapture(0);
 
-    if mod(frameIdx,ToneUpdateRate) == 0 
-        NcoTone = mod(NcoTone + 10,150); %incr by 10 Mhz to 150 Mhz then loop back
-        NcoTone = NcoTone+10;
-        AXI4_Tone_Wr = l_ComputeTone(NcoTone,incrScale);
-        step(NCO_incr_AXI,AXI4_Tone_Wr); % update tone
-        fprintf('Changing tone to %f \n',NcoTone);
-    end
-
-    DDR4_ReadTrigger(1); % Read data out of DDR4
-    DDR4_ReadTrigger(0);     
+    AXI4_DDR4_ReadTrigger(1); % Read data out of DDR4
+    AXI4_DDR4_ReadTrigger(0);     
 
     ADC_Data = AXI4SReadObj();
     if ~DebugMode
@@ -206,17 +240,13 @@ while ~done
     frameIdx = frameIdx + 1;
     
     PrintDiagnostics(DiagnosticRd)
-	
+    
+	pause(1);
 end
 
 
 release(AXI4SReadObj)
 % StreamEn(0) % disable stream
-
-
-function output = l_ComputeTone(NcoTone,incrScale)
-    output = uint16(NcoTone*1e6 * incrScale);
-end
 
 function PrintDiagnostics(DiagnosticRd)
     disp('------------- Diagnostic Read -------------')

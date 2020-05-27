@@ -1,6 +1,6 @@
 %--------------------------------------------------------------------------
 % HDL Workflow Script
-% Generated with MATLAB 9.7 (R2019b) at 23:20:46 on 12/05/2020
+% Generated with MATLAB 9.7 (R2019b) at 14:02:47 on 21/05/2020
 % This script was generated using the following parameter values:
 %     Filename  : 'D:\MY_DATA\HDL_projects\DDR4_IQ_Capture\hdlworkflow.m'
 %     Overwrite : true
@@ -142,6 +142,22 @@ hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadTrigger', 'IOInterfaceMapp
 % Set Inport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Incr', 'IOInterface', 'AXI4');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Incr', 'IOInterfaceMapping', 'x"118"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPILength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPILength', 'IOInterfaceMapping', 'x"120"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulseLength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulseLength', 'IOInterfaceMapping', 'x"124"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulsePeriod', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulsePeriod', 'IOInterfaceMapping', 'x"128"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/rngGateLength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/rngGateLength', 'IOInterfaceMapping', 'x"12C"');
 
 % Set SubSystem HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit', 'AdaptivePipelining', 'on');
