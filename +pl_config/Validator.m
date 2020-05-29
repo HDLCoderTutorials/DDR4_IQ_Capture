@@ -118,7 +118,7 @@ classdef (Abstract) Validator < handle
             % Initialize parser targeting class properties.
             props = obj.getNonconstantNonhiddenProperties();
             % Filter properties using the discriminatorFcn to implement
-            % whitelist/blacklist behavior.
+            % whitelist/blacklist pl_config.
             props = props(arrayfun(discriminatorFcn,props));
             for iprop = 1:length(props)
                 thisprop = props(iprop);

@@ -1,4 +1,4 @@
-classdef RFSoC_Clock_Settings < handle & behavior.Validator
+classdef RFSoC_Clock_Settings < handle & pl_config.Validator
     %RFSoCSettings Holds fpga and ADC/DAC clock speeds
     %   Data class for fpga clock rate and ADC/DAC sample rate.
 

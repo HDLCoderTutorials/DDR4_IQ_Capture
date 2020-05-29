@@ -1,4 +1,4 @@
-classdef Radar_pl_configuration < handle & behavior.Validator
+classdef Radar_pl_configuration < handle & pl_config.Validator
     %Radar_pl_config radar parameters for programable logic.
     %   All parameters required at runtime by the fpga/
     %   programable logic of the radar. Most parameters are in

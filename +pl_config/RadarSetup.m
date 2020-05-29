@@ -1,4 +1,4 @@
-classdef RadarSetup < handle & behavior.Validator
+classdef RadarSetup < handle & pl_config.Validator
     %RadarSetup Takes desired radar settings and calculates pulse delays.
     %   Calculate all state machine, ADC, DAC delays in terms of sample delays.
     %   Provide basic validation, as well as estimate of the data rate and
@@ -164,12 +164,12 @@ classdef RadarSetup < handle & behavior.Validator
             assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),'Not all properties are both defined and singleton.')
             
             % Validate rfsoc_clock object
-            assert(isa(obj.rfsoc_clock_rates,'behavior.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type behavior.RFSoC_Clock_Settings');
+            assert(isa(obj.rfsoc_clock_rates,'pl_config.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type pl_config.RFSoC_Clock_Settings');
             assert(obj.rfsoc_clock_rates.isValid,'rfsoc_clock_rates object reported invalid settings.');
 
             % Validate Radar programable logic configuration object
             % (This is for output, so it doesn't need validation)
-%             assert(isa(obj.radar_pl_configuration,'behavior.Radar_pl_configuration'),'radar_pl_configuration must be object of type behavior.Radar_pl_configuration');
+%             assert(isa(obj.radar_pl_configuration,'pl_config.Radar_pl_configuration'),'radar_pl_configuration must be object of type pl_config.Radar_pl_configuration');
 %             assert(obj.radar_pl_configuration.isValid,'radar_pl_configuration object reported invalid settings.');
 
 
@@ -218,7 +218,7 @@ classdef RadarSetup < handle & behavior.Validator
            assert(obj.isInputValid(),'Input parameters are not sufficient ')
            
            samplesPerClockCycles = obj.rfsoc_clock_rates.sample_rate_hz / obj.rfsoc_clock_rates.fpga_clock_rate_hz;           
-           radar_pl_config = behavior.Radar_pl_configuration(...
+           radar_pl_config = pl_config.Radar_pl_configuration(...
                'pulse_width_cycles',100,'tx_delay_cycles',100,...
                 'adc_rx_samples',1000,'after_rx_pri_delay_cycles',200, ...
                 'samples_per_clock_cycle',obj.rfsoc_clock_rates.samples_per_clock_cycle);
