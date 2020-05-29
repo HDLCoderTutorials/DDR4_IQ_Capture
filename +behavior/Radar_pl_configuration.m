@@ -14,6 +14,8 @@ classdef Radar_pl_configuration < handle & behavior.Validator
         adc_rx_samples % rx samples, range swath + pulse width
         after_rx_pri_delay_cycles % entire PRI interval
         samples_per_clock_cycle
+        start_inc_steps
+        end_inc_steps
     end
 
     methods

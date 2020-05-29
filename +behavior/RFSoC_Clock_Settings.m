@@ -5,6 +5,11 @@ classdef RFSoC_Clock_Settings < handle & behavior.Validator
     properties
         fpga_clock_rate_hz
         sample_rate_hz
+        N_accumulator
+    end
+    
+    properties (Dependent)
+        samples_per_clock_cycle
     end
 
     methods
@@ -17,6 +22,10 @@ classdef RFSoC_Clock_Settings < handle & behavior.Validator
             end
         end
 
+        function samples_per_clock_cycle_value = get.samples_per_clock_cycle(obj)
+           samples_per_clock_cycle_value =  round( obj.sample_rate_hz / obj.fpga_clock_rate_hz );
+        end
+        
         function valid = isValid(obj)
             % isValid validate before use
             valid = obj.allPropertiesAreSingletonAndDefined();

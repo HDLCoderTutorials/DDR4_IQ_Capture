@@ -35,7 +35,8 @@ radarSetup = behavior.RadarSetup('pulses_per_cpi',1024,'pulse_width_sec',1e-6,'p
 %% Test radar setup with supporting objects
 
 clear all
-clock_settings = behavior.RFSoC_Clock_Settings('fpga_clock_rate_hz',128e6,'sample_rate_hz',512e6)
+clock_settings = behavior.RFSoC_Clock_Settings('fpga_clock_rate_hz',128e6,...
+    'sample_rate_hz',512e6,'N_accumulator',14)
 clock_settings.isValid();
 
 radarSetup = behavior.RadarSetup('pulses_per_cpi',1024,'pulse_width_sec',1e-6,'prf_hz',20e3,...
