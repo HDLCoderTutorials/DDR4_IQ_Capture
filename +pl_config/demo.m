@@ -35,14 +35,14 @@ radarSetup = pl_config.RadarSetup('pulses_per_cpi',1024,'pulse_width_sec',1e-6,'
 %% Test radar setup with supporting objects
 
 clear all
-clock_settings = pl_config.RFSoC_Clock_Settings('fpga_clock_rate_hz',128e6,...
+synthesisConfig = pl_config.SynthesisConfig('fpga_clock_rate_hz',128e6,...
     'sample_rate_hz',512e6,'N_accumulator',14)
-clock_settings.isValid();
+synthesisConfig.isValid();
 
 radarSetup = pl_config.RadarSetup('pulses_per_cpi',1024,'pulse_width_sec',1e-6,'prf_hz',20e3,...
     'range_delay_m',200,'range_swath_m',1000,...
     'chirp_start_frequency_hz',-100e6,'chirp_stop_frequency_hz',100e6,...
-    'rfsoc_clock_rates',clock_settings)
+    'pl_synthesis_config',synthesisConfig)
     
 radarSetup.isValid()
 radarSetup.getRadarPerformance()

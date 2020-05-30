@@ -9,7 +9,7 @@ classdef RadarSetup < handle & pl_config.Validator
     properties (Hidden,Constant)
         c = 299792458
         % These properties are not required inputs for producing pl_config.
-        outputProperties = {'radar_pl_configuration'}
+        outputProperties = {'pl_register_config'}
     end
 
     properties (Hidden)
@@ -17,7 +17,7 @@ classdef RadarSetup < handle & pl_config.Validator
     end
 
     properties
-        rfsoc_clock_rates % object containing fpga clock rate and sample rate, in Hz
+        pl_synthesis_config % object containing fpga clock rate and sample rate, in Hz
         pulses_per_cpi % Sets the number of contiguous pulses to capture in memeory per CPI trigger.
         pri_sec % Define either prf_hz or pri_sec, not both. Must be long enough to allow ADC capture to complete.
         pulse_width_sec
@@ -26,7 +26,7 @@ classdef RadarSetup < handle & pl_config.Validator
         chirp_start_frequency_hz
         chirp_stop_frequency_hz
         % Output/Generated properties
-        radar_pl_configuration % Object with config parameters for programable logic.
+        pl_register_config % Object with config parameters for programable logic.
     end
 
     properties (Dependent)
@@ -38,7 +38,7 @@ classdef RadarSetup < handle & pl_config.Validator
     
     methods
         function obj = RadarSetup(varargin)
-            %RFSoC_Clock_Settings Construct an instance of this class
+            %SynthesisConfig Construct an instance of this class
             % Constructor accepts name/value pairs for all properties,
             % or can be called without arguments for an empty object.
             if (nargin>0)
@@ -164,8 +164,8 @@ classdef RadarSetup < handle & pl_config.Validator
             assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),'Not all properties are both defined and singleton.')
             
             % Validate rfsoc_clock object
-            assert(isa(obj.rfsoc_clock_rates,'pl_config.RFSoC_Clock_Settings'),'rfsoc_clock_rates must be object of type pl_config.RFSoC_Clock_Settings');
-            assert(obj.rfsoc_clock_rates.isValid,'rfsoc_clock_rates object reported invalid settings.');
+            assert(isa(obj.pl_synthesis_config,'pl_config.SynthesisConfig'),'pl_synthesis_config must be object of type pl_config.SynthesisConfig');
+            assert(obj.pl_synthesis_config.isValid,'pl_synthesis_config object reported invalid settings.');
 
             % Validate Radar programable logic configuration object
             % (This is for output, so it doesn't need validation)
@@ -189,12 +189,12 @@ classdef RadarSetup < handle & pl_config.Validator
             warning('These calculatioins have not been verified')
             % Should validate that required properties have been defined
 %             assert(obj.allPropertiesAreSingletonAndDefined('include',{'pri_sec','pulse_width_sec'}) && ...
-%                 obj.allPropertiesAreDefined('include',{'rfsoc_clock_rates'}) && obj.rfsoc_clock_rates.isValid(), ...
+%                 obj.allPropertiesAreDefined('include',{'pl_synthesis_config'}) && obj.pl_synthesis_config.isValid(), ...
 %             'Additional parameters must be defined before calculation is possible.');
             % Intermediate parameters
             recoveryTime = 0;      
             ADC_sample_sec = (obj.pulse_width_sec + obj.range_swath_m / obj.c); % Pulse width time + range swath time
-            samplesPerPulse = ADC_sample_sec  * obj.rfsoc_clock_rates.sample_rate_hz;
+            samplesPerPulse = ADC_sample_sec  * obj.pl_synthesis_config.sample_rate_hz;
             bitsPerSample = 32; % Complex Samples
             % Generate outputs
             performanceParameters.blindRange = (obj.c * (obj.pri_sec + recoveryTime))/2;
@@ -217,21 +217,21 @@ classdef RadarSetup < handle & pl_config.Validator
            
            assert(obj.isInputValid(),'Input parameters are not sufficient ')
            
-           samplesPerClockCycles = obj.rfsoc_clock_rates.sample_rate_hz / obj.rfsoc_clock_rates.fpga_clock_rate_hz;           
+           samplesPerClockCycles = obj.pl_synthesis_config.sample_rate_hz / obj.pl_synthesis_config.fpga_clock_rate_hz;           
            radar_pl_config = pl_config.Radar_pl_configuration(...
                'pulse_width_cycles',100,'tx_delay_cycles',100,...
                 'adc_rx_samples',1000,'after_rx_pri_delay_cycles',200, ...
-                'samples_per_clock_cycle',obj.rfsoc_clock_rates.samples_per_clock_cycle);
+                'samples_per_clock_cycle',obj.pl_synthesis_config.samples_per_clock_cycle);
             
-            N = obj.rfsoc_clock_rates.N_accumulator;       
+            N = obj.pl_synthesis_config.N_accumulator;       
             radar_pl_config.start_inc_steps = ...
                 round (((obj.chirp_start_frequency_hz*2^N)...
-                /obj.rfsoc_clock_rates.fpga_clock_rate_hz)/...
-                obj.rfsoc_clock_rates.samples_per_clock_cycle); 
+                /obj.pl_synthesis_config.fpga_clock_rate_hz)/...
+                obj.pl_synthesis_config.samples_per_clock_cycle); 
             radar_pl_config.end_inc_steps  = ...
                 round (((obj.chirp_stop_frequency_hz*2^N)...
-                /obj.rfsoc_clock_rates.fpga_clock_rate_hz)/...
-                obj.rfsoc_clock_rates.samples_per_clock_cycle); 
+                /obj.pl_synthesis_config.fpga_clock_rate_hz)/...
+                obj.pl_synthesis_config.samples_per_clock_cycle); 
             
             %Pulse width and frequencies must be chosen so that LFM_counter_inc is an
             %integer, will use floor here which changes end freq to slightly less in
