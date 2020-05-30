@@ -1,5 +1,5 @@
-classdef Radar_pl_configuration < handle & pl_config.Validator
-    %Radar_pl_config radar parameters for programable logic.
+classdef RegisterConfig < handle & pl_config.Validator
+    %RegisterConfig radar parameters for programable logic.
     %   All parameters required at runtime by the fpga/
     %   programable logic of the radar. Most parameters are in
     %   integers, with time in fpga clock cycles.
@@ -19,7 +19,7 @@ classdef Radar_pl_configuration < handle & pl_config.Validator
     end
 
     methods
-        function obj = Radar_pl_configuration(varargin)
+        function obj = RegisterConfig(varargin)
         % Constructor accepts name/value pairs for all properties,
         % or can be called without arguments for an empty object.
             if (nargin>0)

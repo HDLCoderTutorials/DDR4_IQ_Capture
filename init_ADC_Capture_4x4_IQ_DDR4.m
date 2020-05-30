@@ -99,5 +99,5 @@ sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 
 requiredVars{end+1} = 'requiredVars'; % To aid debugging
 requiredVars{end+1} = 'plConfig';
-plConfig = behavior.Radar_pl_configuration;
+plConfig = pl_config.RegisterConfig;
 clearvars('-except',requiredVars{:})
