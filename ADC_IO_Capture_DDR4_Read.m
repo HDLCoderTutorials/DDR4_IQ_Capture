@@ -187,8 +187,8 @@ AXI4_NCO_incr(start_inc);
 AXI4_NCO_end_incr(end_inc);
 AXI4_NCO_step_value(LFM_counter_inc);
 
-AXI4_NCO_DAC_I_Gain(.5);
-AXI4_NCO_DAC_Q_Gain(.5);
+AXI4_NCO_DAC_I_Gain(1);
+AXI4_NCO_DAC_Q_Gain(1);
 
 AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
 AXI4_ADC_CaptureLength(CaptureSize);% setup frame-size
