@@ -11,13 +11,15 @@ DDR4_ReadLen = CaptureSize;
 % If false we capture ADC data
 DebugMode = 0; 
 
-%% AXI4 Stream IIO Write 
-AXI4SReadObj = pspshared.libiio.axistream.read(...
-                  'IPAddress',IPAddr,...
-                  'SamplesPerFrame',DDR4_ReadLen,...
-                  'DataType','ufix128',...
-                  'Timeout',0);
-setup(AXI4SReadObj);
+% %% AXI4 Stream IIO Write 
+% AXI4SReadObj = pspshared.libiio.axistream.read(...
+%                   'IPAddress',IPAddr,...
+%                   'SamplesPerFrame',DDR4_ReadLen,...
+%                   'DataType','ufix128',...
+%                   'Timeout',0);
+% setup(AXI4SReadObj);
+
+rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType','int16');
 
 %% Scopes
 
@@ -220,21 +222,33 @@ while ~done
    % TriggerCapture(1); % Trigger capture into DDR4 Memory
    % TriggerCapture(0);
 
-    AXI4_DDR4_ReadTrigger(1); % Read data out of DDR4
-    AXI4_DDR4_ReadTrigger(0);     
-
-    ADC_Data = AXI4SReadObj();
-    if ~DebugMode
-        data = bitSlice128(ADC_Data);
-    else
-        data = ADC_Data;
-        % Check if data is mis-aligned
-        if any ( diff(double(data)) ~= 1)
-            warning('In debug capture, found mis-alignment in frame!');
-        end
-        
-    end
+%     AXI4_DDR4_ReadTrigger(1); % Read data out of DDR4
+%     AXI4_DDR4_ReadTrigger(0);     
+% 
+%     ADC_Data = AXI4SReadObj();
+%     if ~DebugMode
+%         data = bitSlice128(ADC_Data);
+%     else
+%         data = ADC_Data;
+%         % Check if data is mis-aligned
+%         if any ( diff(double(data)) ~= 1)
+%             warning('In debug capture, found mis-alignment in frame!');
+%         end
+%         
+%     end
 	
+    % Perform shared mem retreival
+
+    data_rd_1 = rd(0,CaptureSize*8); % read 2 gigs out, 8 or how many int16 samples in 128
+
+    % Unpack data from word-ordering in memory 
+    % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
+    % will no longer work
+    temp = reshape(data_rd_1, 4, []);
+    data_i = reshape(temp(:,1:2:end),1,[]);
+    data_q = reshape(temp(:,2:2:end),1,[]);
+    data = complex(data_i,data_q);
+    
     hScope(data); % Plot data
     hSpecAn(data);
     frameIdx = frameIdx + 1;
