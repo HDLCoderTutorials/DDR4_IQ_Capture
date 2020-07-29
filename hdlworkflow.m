@@ -1,8 +1,8 @@
 %--------------------------------------------------------------------------
 % HDL Workflow Script
-% Generated with MATLAB 9.7 (R2019b) at 14:02:47 on 21/05/2020
+% Generated with MATLAB 9.7 (R2019b) at 22:43:48 on 27/07/2020
 % This script was generated using the following parameter values:
-%     Filename  : 'D:\MY_DATA\HDL_projects\DDR4_IQ_Capture\hdlworkflow.m'
+%     Filename  : 'C:\Projects\MATLAB\HDLCoder\DDR4_IQ_Capture\hdlworkflow.m'
 %     Overwrite : true
 %     Comments  : true
 %     Headers   : true
@@ -22,8 +22,8 @@ load_system('ADC_Capture_4x4_IQ_DDR4');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'AdaptivePipelining', 'off');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ClockRatePipelining', 'off');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'HDLSubsystem', 'ADC_Capture_4x4_IQ_DDR4/HDL_IP');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ReferenceDesign', 'ADC & DAC XM500 Balun Single-Ended 4x4 IQ Mode with DDR4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ReferenceDesignParameter', {'MW_AXIS_DATA_WIDTH','128','MW_ADC_SAMPLE_RATE','2048','MW_ADC_DECIMATION_MODE','4','MW_ADC_SAMPLES_PER_CLOCK','4','MW_ADC_MIXER_TYPE','Fine','MW_PLL_REF_CLK','245.760','MW_DAC_SAMPLE_RATE','2048','MW_DAC_INTERPOLATION_MODE','4','MW_DAC_SAMPLES_PER_CLOCK','4','MW_DAC_MIXER_TYPE','Fine','MW_ADD_MTS','false','MW_TILE_CLK','128.000','DUTSynthFreqMHz','128.000','MW_ENABLE_WIDE_DATAWIDTH','false','MW_ADD_DDR4','true','MW_ADC_TILE0_ACTIVE','true','MW_ADC_TILE0_CHANNELS','0 1 2 3','MW_ADC_TILE1_ACTIVE','true','MW_ADC_TILE1_CHANNELS','0 1 2 3','MW_ADC_TILE2_ACTIVE','false','MW_ADC_TILE2_CHANNELS','0','MW_ADC_TILE3_ACTIVE','false','MW_ADC_TILE3_CHANNELS','0','MW_DAC_TILE0_ACTIVE','false','MW_DAC_TILE0_CHANNELS','0','MW_DAC_TILE1_ACTIVE','true','MW_DAC_TILE1_CHANNELS','0 1 2 3','HDLVerifierJTAGAXI','off'});
+hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ReferenceDesign', 'I/Q with DDR4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ReferenceDesignParameter', {'MW_AXIS_DATA_WIDTH','128','MW_ADC_SAMPLE_RATE','2048','MW_ADC_DECIMATION_MODE','4','MW_ADC_SAMPLES_PER_CLOCK','4','MW_ADC_MIXER_TYPE','Fine','MW_DAC_SAMPLE_RATE','2048','MW_DAC_INTERPOLATION_MODE','4','MW_DAC_SAMPLES_PER_CLOCK','4','MW_DAC_MIXER_TYPE','Fine','MW_ADD_MTS','false','MW_TILE_CLK','128.000','DUTSynthFreqMHz','128.000','MW_PLL_REF_CLK','245.760','MW_ADD_DDR4','true','HDLVerifierJTAGAXI','off'});
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'ResetType', 'Synchronous');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'SynthesisTool', 'Xilinx Vivado');
 hdlset_param('ADC_Capture_4x4_IQ_DDR4', 'SynthesisToolChipFamily', 'Zynq UltraScale+ RFSoC');
@@ -112,67 +112,75 @@ hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/Tile2 ADC Mixer Ch2-IQ Valid', 'IOI
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/Tile2 ADC Mixer Ch2-IQ Valid', 'IOInterfaceMapping', '[0]');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_SelectCh', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_SelectCh', 'IOInterfaceMapping', 'x"11C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ADC_SelectCh', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ADC_SelectCh', 'IOInterfaceMapping', 'x"11C"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPIStart', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPIStart', 'IOInterfaceMapping', 'x"100"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CPIStart', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CPIStart', 'IOInterfaceMapping', 'x"100"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DebugCaptureRegister', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DebugCaptureRegister', 'IOInterfaceMapping', 'x"108"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DebugCaptureRegister', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DebugCaptureRegister', 'IOInterfaceMapping', 'x"108"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureLength', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/ADC_CaptureLength', 'IOInterfaceMapping', 'x"104"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ADC_CaptureLength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ADC_CaptureLength', 'IOInterfaceMapping', 'x"104"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadFrameLen', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadFrameLen', 'IOInterfaceMapping', 'x"10C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadFrameLen', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadFrameLen', 'IOInterfaceMapping', 'x"10C"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadAddress', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadAddress', 'IOInterfaceMapping', 'x"110"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadAddress', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadAddress', 'IOInterfaceMapping', 'x"110"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadTrigger', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR4_ReadTrigger', 'IOInterfaceMapping', 'x"114"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadTrigger', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_DDR4_ReadTrigger', 'IOInterfaceMapping', 'x"114"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Incr', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Incr', 'IOInterfaceMapping', 'x"118"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CPILength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CPILength', 'IOInterfaceMapping', 'x"120"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPILength', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/CPILength', 'IOInterfaceMapping', 'x"120"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_PulseWidth', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_PulseWidth', 'IOInterfaceMapping', 'x"124"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulseLength', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulseLength', 'IOInterfaceMapping', 'x"124"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_PRI', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_PRI', 'IOInterfaceMapping', 'x"128"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulsePeriod', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/pulsePeriod', 'IOInterfaceMapping', 'x"128"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_RngGateDelay', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_RngGateDelay', 'IOInterfaceMapping', 'x"12C"');
 
 % Set Inport HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/rngGateLength', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/rngGateLength', 'IOInterfaceMapping', 'x"12C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_incr', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_incr', 'IOInterfaceMapping', 'x"118"');
 
-% Set SubSystem HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit', 'AdaptivePipelining', 'on');
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_DAC_I_Gain', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_DAC_I_Gain', 'IOInterfaceMapping', 'x"130"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_DAC_Q_Gain', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_DAC_Q_Gain', 'IOInterfaceMapping', 'x"134"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_end_incr', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_end_incr', 'IOInterfaceMapping', 'x"138"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_step_value', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_NCO_step_value', 'IOInterfaceMapping', 'x"140"');
+
+% Set Inport HDL parameters
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_RngSwathLength', 'IOInterface', 'AXI4');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_RngSwathLength', 'IOInterfaceMapping', 'x"13C"');
 
 % Set MATLABSystem HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit/NCO HDL Optimized1', 'LUTRegisterResetType', 'none');
-
-% Set MATLABSystem HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit/NCO HDL Optimized2', 'LUTRegisterResetType', 'none');
-
-% Set MATLABSystem HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit/NCO HDL Optimized3', 'LUTRegisterResetType', 'none');
-
-% Set MATLABSystem HDL parameters
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit/NCO HDL Optimized4', 'LUTRegisterResetType', 'none');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO/For Each NCO Vectorized/NCO HDL Optimized1', 'LUTRegisterResetType', 'none');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/dut_diagnostics_rd/Subsystem/S2MM_TreadyLowCount', 'IOInterface', 'ADC Tile1: RF Data Converter DAC3 Master');
@@ -296,43 +304,43 @@ hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/Tile2 DAC Mixer Ch4-IQ Valid', 'IOI
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_S2MM_TreadyLowCount', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_S2MM_TreadyLowCount', 'IOInterfaceMapping', 'x"140"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_S2MM_TreadyLowCount', 'IOInterfaceMapping', 'x"144"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AXI4S_TlastCheck', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AXI4S_TlastCheck', 'IOInterfaceMapping', 'x"134"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AXI4S_TlastCheck', 'IOInterfaceMapping', 'x"148"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFOCapture_Overflow', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFOCapture_Overflow', 'IOInterfaceMapping', 'x"138"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFOCapture_Overflow', 'IOInterfaceMapping', 'x"14C"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFODMA_Overflow', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFODMA_Overflow', 'IOInterfaceMapping', 'x"13C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_FIFODMA_Overflow', 'IOInterfaceMapping', 'x"150"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WriteCompleteCount', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WriteCompleteCount', 'IOInterfaceMapping', 'x"144"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WriteCompleteCount', 'IOInterfaceMapping', 'x"154"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ReadCompleteCount', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ReadCompleteCount', 'IOInterfaceMapping', 'x"148"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_ReadCompleteCount', 'IOInterfaceMapping', 'x"158"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AccumulatedWrRdyCount', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AccumulatedWrRdyCount', 'IOInterfaceMapping', 'x"14C"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AccumulatedWrRdyCount', 'IOInterfaceMapping', 'x"15C"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WastedWriteCycles', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WastedWriteCycles', 'IOInterfaceMapping', 'x"150"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_WastedWriteCycles', 'IOInterfaceMapping', 'x"160"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AckLow_Count', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AckLow_Count', 'IOInterfaceMapping', 'x"154"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_AckLow_Count', 'IOInterfaceMapping', 'x"164"');
 
 % Set Outport HDL parameters
 hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CaptureFIFONum', 'IOInterface', 'AXI4');
-hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CaptureFIFONum', 'IOInterfaceMapping', 'x"158"');
+hdlset_param('ADC_Capture_4x4_IQ_DDR4/HDL_IP/AXI4_CaptureFIFONum', 'IOInterfaceMapping', 'x"168"');
 
 
 %% Workflow Configuration Settings
@@ -345,11 +353,11 @@ hWC.ReferenceDesignToolVersion = '2018.3';
 hWC.IgnoreToolVersionMismatch = false;
 
 % Set Workflow tasks to run
-hWC.RunTaskGenerateRTLCodeAndIPCore = true;
-hWC.RunTaskCreateProject = true;
-hWC.RunTaskGenerateSoftwareInterfaceModel = true;
-hWC.RunTaskBuildFPGABitstream = true;
-hWC.RunTaskProgramTargetDevice = false;
+hWC.RunTaskGenerateRTLCodeAndIPCore = false;
+hWC.RunTaskCreateProject = false;
+hWC.RunTaskGenerateSoftwareInterfaceModel = false;
+hWC.RunTaskBuildFPGABitstream = false;
+hWC.RunTaskProgramTargetDevice = true;
 
 % Set properties related to 'RunTaskGenerateRTLCodeAndIPCore' Task
 hWC.IPCoreRepository = '';

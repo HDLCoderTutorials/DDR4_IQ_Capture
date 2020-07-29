@@ -3,7 +3,7 @@
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
 CaptureSize = CaptureLength;
-
+%CaptureSize = 1024;
 DDR4_ReadLen = CaptureSize;
 
 % Debug mode:
@@ -249,15 +249,18 @@ while ~done
     data_q = reshape(temp(:,2:2:end),1,[]);
     data = complex(data_i,data_q);
     
-    hScope(data); % Plot data
-    hSpecAn(data);
+    disp('1')
+%     plot(data_i)
+    hScope(data_i); % Plot data
+    disp('2')
+    hSpecAn(data_i);
     frameIdx = frameIdx + 1;
-    
+    disp('3')
     PrintDiagnostics(DiagnosticRd)
-    
+    disp('4')
 	pause(1);
 end
-
+%return
 
 release(AXI4SReadObj)
 % StreamEn(0) % disable stream
