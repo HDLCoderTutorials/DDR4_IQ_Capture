@@ -35,7 +35,7 @@ hScope = dsp.TimeScope(1, Fs,...
 hSpecAn = dsp.SpectrumAnalyzer( ...
                     'SampleRate', Fs);
 hSpecAn.FrequencyResolutionMethod = 'Windowlength';
-hSpecAn.WindowLength = CaptureLength;
+hSpecAn.WindowLength = CaptureLength; %Look at all the pulses captured due to assignment of Capturelength
 hSpecAn.Window = 'Rectangular';
 
 %These 4 lines capture the scope or spectrum analyzer plots closing so we
@@ -234,15 +234,15 @@ while ~done
     data_q = reshape(temp(:,2:2:end),[],1);
     data = complex(data_i,data_q);
     
-    disp('1')
+   
     hScope(data); % Plot data
-    disp('2')
+   
     hSpecAn(data); % Plot freq response
     frameIdx = frameIdx + 1;
-    disp('3')
+   
     PrintDiagnostics(DiagnosticRd)
-    disp('4')
-	pause(1);
+    
+% 	pause(1);
 end
 %return
 
