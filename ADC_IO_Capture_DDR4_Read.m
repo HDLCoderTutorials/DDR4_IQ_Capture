@@ -38,6 +38,8 @@ hSpecAn.FrequencyResolutionMethod = 'Windowlength';
 hSpecAn.WindowLength = CaptureLength;
 hSpecAn.Window = 'Rectangular';
 
+%These 4 lines capture the scope or spectrum analyzer plots closing so we
+%can punt out of while loop with done=true
 frmWrk = hScope.getFramework;
 addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
 frmWrk = hSpecAn.getFramework;
@@ -219,27 +221,7 @@ while ~done
    
    AXI4_CPIStart(1);
    AXI4_CPIStart(0);
-   % The two lines below have been incorrect since we design was modified
-   % for CPI's and radar pulses updated to CPIStart above, may have worked
-   % in some version depending on address TriggerCapture was mapped to
-   % TriggerCapture(1); % Trigger capture into DDR4 Memory
-   % TriggerCapture(0);
-
-%     AXI4_DDR4_ReadTrigger(1); % Read data out of DDR4
-%     AXI4_DDR4_ReadTrigger(0);     
-% 
-%     ADC_Data = AXI4SReadObj();
-%     if ~DebugMode
-%         data = bitSlice128(ADC_Data);
-%     else
-%         data = ADC_Data;
-%         % Check if data is mis-aligned
-%         if any ( diff(double(data)) ~= 1)
-%             warning('In debug capture, found mis-alignment in frame!');
-%         end
-%         
-%     end
-	
+  
     % Perform shared mem retreival
 
     data_rd_1 = rd(0,CaptureLength*8); % read 2 gigs out, 8 or how many int16 samples in 128
@@ -253,10 +235,9 @@ while ~done
     data = complex(data_i,data_q);
     
     disp('1')
-%     plot(data_i)
     hScope(data); % Plot data
     disp('2')
-    hSpecAn(data);
+    hSpecAn(data); % Plot freq response
     frameIdx = frameIdx + 1;
     disp('3')
     PrintDiagnostics(DiagnosticRd)
