@@ -2,9 +2,8 @@
 %%clear
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
-CaptureSize = CaptureLength;
-%CaptureSize = 1024;
-DDR4_ReadLen = CaptureSize;
+
+DDR4_ReadLen = CaptureLength;
 
 % Debug mode:
 % If set to true, we capture counter data which is a ramp from 1 to N
@@ -35,6 +34,10 @@ hScope = dsp.TimeScope(1, Fs,...
                     'LayoutDimensions', [1 1]);
 hSpecAn = dsp.SpectrumAnalyzer( ...
                     'SampleRate', Fs);
+hSpecAn.FrequencyResolutionMethod = 'Windowlength';
+hSpecAn.WindowLength = CaptureLength;
+hSpecAn.Window = 'Rectangular';
+
 frmWrk = hScope.getFramework;
 addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
 frmWrk = hSpecAn.getFramework;
@@ -193,7 +196,7 @@ AXI4_NCO_DAC_I_Gain(1);
 AXI4_NCO_DAC_Q_Gain(1);
 
 AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
-AXI4_ADC_CaptureLength(CaptureSize);% setup frame-size
+AXI4_ADC_CaptureLength(CaptureLength);% setup frame-size
 % DDR4 Read settings
 AXI4_DDR4_ReadFrameLen(DDR4_ReadLen); 
 AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
@@ -239,7 +242,7 @@ while ~done
 	
     % Perform shared mem retreival
 
-    data_rd_1 = rd(0,CaptureSize*8); % read 2 gigs out, 8 or how many int16 samples in 128
+    data_rd_1 = rd(0,CaptureLength*8); % read 2 gigs out, 8 or how many int16 samples in 128
 
     % Unpack data from word-ordering in memory 
     % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
@@ -253,7 +256,7 @@ while ~done
 %     plot(data_i)
     hScope(data); % Plot data
     disp('2')
-    hSpecAn(data_i);
+    hSpecAn(data);
     frameIdx = frameIdx + 1;
     disp('3')
     PrintDiagnostics(DiagnosticRd)
