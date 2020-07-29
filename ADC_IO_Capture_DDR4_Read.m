@@ -245,13 +245,13 @@ while ~done
     % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
     % will no longer work
     temp = reshape(data_rd_1, 4, []);
-    data_i = reshape(temp(:,1:2:end),1,[]);
-    data_q = reshape(temp(:,2:2:end),1,[]);
+    data_i = reshape(temp(:,1:2:end),[],1);
+    data_q = reshape(temp(:,2:2:end),[],1);
     data = complex(data_i,data_q);
     
     disp('1')
 %     plot(data_i)
-    hScope(data_i); % Plot data
+    hScope(data); % Plot data
     disp('2')
     hSpecAn(data_i);
     frameIdx = frameIdx + 1;
@@ -262,7 +262,7 @@ while ~done
 end
 %return
 
-release(AXI4SReadObj)
+release(rd) %releases shared memory object reader
 % StreamEn(0) % disable stream
 
 function PrintDiagnostics(DiagnosticRd)
