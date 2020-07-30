@@ -35,7 +35,9 @@ hScope = dsp.TimeScope(1, Fs,...
 hSpecAn = dsp.SpectrumAnalyzer( ...
                     'SampleRate', Fs);
 hSpecAn.FrequencyResolutionMethod = 'Windowlength';
-hSpecAn.WindowLength = CaptureLength; %Look at all the pulses captured due to assignment of Capturelength
+hSpecAn.PlotMaxHoldTrace = false;
+hSpecAn.PlotNormalTrace = true;
+hSpecAn.WindowLength = CaptureLength/CPILength*4; %Capturelength/CPILength is the first pulse, just look at first 4
 hSpecAn.Window = 'Rectangular';
 
 %These 4 lines capture the scope or spectrum analyzer plots closing so we
