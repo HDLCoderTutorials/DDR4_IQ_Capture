@@ -22,7 +22,7 @@ RngSwathLength = PulseWidth * 1.25; % time in seconds of RX data to save each pu
 
 %% CHIRP parameters
 
-f0 = -200e6;
+f0 = 1e6;
 f1 = 200e6; 
 
 N = 14;    % accum WL
