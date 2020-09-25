@@ -1,5 +1,6 @@
 
-%%clear
+clear
+init_ADC_Capture_4x4_IQ_DDR4
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
 
