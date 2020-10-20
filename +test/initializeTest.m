@@ -48,12 +48,12 @@ function setupOnce(testCase)  % do not change function name
     
     for iVar = 1:numel(requiredVars)
         variableName = requiredVars{iVar};
-        assert(exist(variableName,'var'), ['Required variable ', ...
+        assert(exist(variableName,'var') == 1, ['Required variable ', ...
             variableName,' does not exist.'])
-            outputParameters.(variableName) = eval(variableName)
+        outputParameters.(variableName) = eval(variableName)
     end            
-        testCase.TestData.requiredVars = requiredVars;
-        testCase.TestData.outputParameters = outputParameters;           
+    testCase.TestData.requiredVars = requiredVars;
+    testCase.TestData.outputParameters = outputParameters;           
 end
 
 function teardownOnce(testCase)  % do not change function name
