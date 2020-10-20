@@ -25,7 +25,9 @@ RngSwathLength = 4*PulseWidth * 1.25; % time in seconds of RX data to save each 
 
 %% CHIRP parameters
 
-f0 = 0;
+% f0 = -250e6;
+% f1 = 250e6; 
+f0 = 0e6;
 f1 = 140e6; 
 
 requiredVars{end+1} = 'N'; % HDL Counter max values 2^(N-1)-1
