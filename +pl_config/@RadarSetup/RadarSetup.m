@@ -205,56 +205,13 @@ classdef RadarSetup < handle & pl_config.Validator
             performanceParameters.pulse_data_KB = pulse_data_bits /8/1e3;
             performanceParameters.cpi_data_MB = cpi_data_bits/8/1e6;
             performanceParameters.cpi_data_MB_per_second = cpi_data_bits_per_second /8/1e6;
-        end
-        
-        function pl_register_config = getRadarPlConfig(obj)
-           % Calculate Programable Logic radar configuration parameters
-           % from class properties. Validate integrity of inputs and
-           % outputs before and after calculations.
-           % Round parameters as needed to fit limitations 
-           % of Programable Logic.
-           warning('getRadarPlConfig calculations are NOT complete. Proof of concept only.')
-           
-           assert(obj.isInputValid(),'Input parameters are not sufficient ')
-           
-           samplesPerClockCycles = obj.pl_synthesis_config.sample_rate_hz / obj.pl_synthesis_config.fpga_clock_rate_hz;           
-           pl_register_config = pl_config.RegisterConfig(...
-               'pulse_width_cycles',100,...
-               'tx_delay_cycles',100,...
-                'adc_rx_samples',1000,...
-                'after_rx_pri_delay_cycles',200, ...
-                'samples_per_clock_cycle',obj.pl_synthesis_config.samples_per_clock_cycle);
-            
-            N = obj.pl_synthesis_config.N_accumulator;       
-            pl_register_config.start_inc_steps = ...
-                round (((obj.chirp_start_frequency_hz*2^N)...
-                /obj.pl_synthesis_config.fpga_clock_rate_hz)/...
-                obj.pl_synthesis_config.samples_per_clock_cycle); 
-            pl_register_config.end_inc_steps  = ...
-                round (((obj.chirp_stop_frequency_hz*2^N)...
-                /obj.pl_synthesis_config.fpga_clock_rate_hz)/...
-                obj.pl_synthesis_config.samples_per_clock_cycle); 
-            
-            %Pulse width and frequencies must be chosen so that LFM_counter_inc is an
-            %integer, will use floor here which changes end freq to slightly less in
-            %some cases
-            LFM_counter_inc = floor((pl_register_config.end_inc_steps-pl_register_config.start_inc_steps)/...
-                pl_register_config.pulse_width_cycles);
-            % adjust end_inc for counter limitation
-            end_inc = pl_register_config.start_inc_steps + LFM_counter_inc*pl_register_config.pulse_width_cycles;
-            pl_register_config.end_inc_steps = end_inc/(2^(N-1)-1)*256;
-            fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
-            fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
-                pl_register_config.end_inc_steps);
-            
-            assert(pl_register_config.isValid(),'Radar Programable Logic Configuration object is not valid')           
-            obj.pl_register_config = pl_register_config;
-        end
+        end       
         
     end
     
     methods
         plot(obj)
+        pl_register_config = getRadarPlConfig(obj)
     end
     
     methods (Static)
