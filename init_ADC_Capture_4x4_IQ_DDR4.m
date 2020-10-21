@@ -1,4 +1,5 @@
 %% Initialize parameters
+clearvars
 clearvars requiredVars
 requiredVars = {};
 
@@ -33,9 +34,6 @@ f1 = 140e6;
 requiredVars{end+1} = 'N'; % HDL Counter max values 2^(N-1)-1
 N = 14;    % accum WL
 
-requiredVars{end+1} = 'CaptureLength';
-CaptureLength = CPILength*RngSwathLength;
-
 PRF_period = 1/PRF; % seconds
 requiredVars{end+1} = 'PRI_count';
 PRI_count = PRF_period*fpga_clk_rate;
@@ -46,9 +44,11 @@ PulseWidth_count = PulseWidth*fpga_clk_rate;
 requiredVars{end+1} = 'RngGateDelay_count';
 RngGateDelay_count =RngGateDelay*fpga_clk_rate; % seconds 
 requiredVars{end+1} = 'RngSwathLength_count';
-RngSwathLength_count = RngSwathLength*fpga_clk_rate;
+RngSwathLength_count = RngSwathLength*fpga_clk_rate; % seconds * clocks per sec = fpga clock cycles
 
-CaptureLength = CPILength*RngSwathLength_count;
+requiredVars{end+1} = 'CaptureLength';
+CaptureLength = CPILength*RngSwathLength; % n*seconds = seconds
+CaptureLength = CPILength*RngSwathLength_count; % pulse_count * fpgaClockCycle_count
 
 requiredVars{end+1} = 'start_inc'; % NCO increments for fo and f1
 start_inc = round (((f0*2^N)/fpga_clk_rate)/VectorSamplingFactor);
@@ -100,8 +100,8 @@ sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 %% Cleanup parameters, testing to see which parameters are required.
 
 requiredVars{end+1} = 'requiredVars'; % To aid debugging
-requiredVars{end+1} = 'plConfig';
-plConfig = pl_config.RegisterConfig;
+% requiredVars{end+1} = 'plConfig';
+% plConfig = pl_config.RegisterConfig;
 
 % This clearvars line is used to clear all variables from the workspace
 % that aren't found in the clearvars cellarray. The objective is to verify
@@ -113,4 +113,26 @@ plConfig = pl_config.RegisterConfig;
 % will be moved to the +pl_config.RadarSetup Class and this
 % script will be cleaned up.
 
-%clearvars('-except',requiredVars{:}) 
+% Clears all non-required vars
+clearvars('-except',requiredVars{:})
+
+% Clear some required vars, show name and value of last cleared var
+replacedRequiredVars = requiredVars(1:4);
+display('Last prelacement varaible:   ')
+eval(replacedRequiredVars{end})
+clearvars(replacedRequiredVars{:})
+% Generates all object oriented initialization objects, though 
+% not guaranteed to have the same input/initialization
+initObjects = initialize.initializeObjects();
+
+
+Fs = initObjects.synthesisConfig.sample_rate_hz; % Read
+VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
+CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
+N = initObjects.synthesisConfig.N_accumulator; % all over slx,
+% CaptureLength = initObjects.pl_register_config.adc_rx_samples; % Read.m, 
+
+
+
+% Compile slx
+% ADC_Capture_4x4_IQ_DDR4([], [], [], 'compile')
