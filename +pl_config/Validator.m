@@ -187,5 +187,18 @@ classdef (Abstract) Validator < handle
         end
 
     end
+    
+    methods (Static)
+        function cellOut = struct2NameValuePairCellArray(s)
+            fieldNames = fieldnames(s);
+            fieldValues = struct2cell(s);
+            cellOut = cell(1, 2 * numel(fieldValues) );
+            for iField = 1:numel(fieldNames)
+               cellOut{iField*2 - 1} = fieldNames{iField};
+               cellOut{iField*2} = fieldValues{iField};
+            end
+        end
+    end
+    
 end
 
