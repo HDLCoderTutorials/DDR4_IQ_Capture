@@ -118,7 +118,7 @@ clearvars('-except',requiredVars{:})
 
 % Clear some required vars, show name and value of last cleared var
 replacedRequiredVars = requiredVars(1:4);
-display('Last prelacement varaible:   ')
+disp('Last prelacement varaible:   ')
 eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
 % Generates all object oriented initialization objects, though 
@@ -126,11 +126,11 @@ clearvars(replacedRequiredVars{:})
 initObjects = initialize.initializeObjects();
 
 
-Fs = initObjects.synthesisConfig.sample_rate_hz; % Read
+Fs = initObjects.synthesisConfig.sample_rate_hz; % Read.m
 VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
 CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
 N = initObjects.synthesisConfig.N_accumulator; % all over slx,
-% CaptureLength = initObjects.pl_register_config.adc_rx_samples; % Read.m, 
+% CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
 
 
 

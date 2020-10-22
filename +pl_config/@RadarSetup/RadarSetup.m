@@ -22,6 +22,8 @@ classdef RadarSetup < handle & pl_config.Validator
         pri_sec % Define either prf_hz or pri_sec, not both. Must be long enough to allow ADC capture to complete.
         pulse_width_sec
         range_swath_m % Range swath in meters, note that this must be added to the pulse width in calculating the number of ADC samples.
+        % Range_Delay_m  is this to the start of the range swath or the
+        % middle?  Name makes it seem like the start.
         range_delay_m % Start of range swath. Must be greater delay than the pulse width.
         chirp_start_frequency_hz
         chirp_stop_frequency_hz

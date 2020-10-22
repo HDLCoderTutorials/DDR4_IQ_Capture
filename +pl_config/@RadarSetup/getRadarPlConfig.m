@@ -8,9 +8,11 @@ warning('getRadarPlConfig calculations are NOT complete. Proof of concept only.'
 assert(obj.isInputValid(),'Input parameters are not sufficient ')
 synthConfig = obj.pl_synthesis_config; % Make local copy to shorten name.
 
-regConfigInput.pulse_width_cycles = 100;
+regConfigInput.pulse_width_cycles = obj.pulse_width_sec * synthConfig.fpga_clock_rate_hz;
+% tx_delay_cycles is the delay between transmit and 
 regConfigInput.tx_delay_cycles = 100;
-regConfigInput.adc_rx_samples = 1000;
+regConfigInput.range_swath_cycles = ...
+    (obj.range_swath_m/3e8 + obj.pulse_width_sec) * synthConfig.fpga_clock_rate_hz;
 regConfigInput.after_rx_pri_delay_cycles = 200;
 regConfigInput.samples_per_clock_cycle = synthConfig.samples_per_clock_cycle;
 % Convert regConfigInput to cell name/value pairs, then to RegisterConfig object.

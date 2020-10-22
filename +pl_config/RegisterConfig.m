@@ -10,8 +10,7 @@ classdef RegisterConfig < handle & pl_config.Validator
     properties
         pulse_width_cycles % DAC/Tx width
         tx_delay_cycles % time between tx and rx
-            % Should adc rx be in samples or in fpga clock cycles?
-        adc_rx_samples % rx samples, range swath + pulse width
+        range_swath_cycles % rx time in fpga cycles, range swath + pulse width
         after_rx_pri_delay_cycles % entire PRI interval
         samples_per_clock_cycle
         start_inc_steps
