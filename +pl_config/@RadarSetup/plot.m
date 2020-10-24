@@ -13,9 +13,9 @@ function plot(obj)
     normalizedTxLength = ceil(normalizedMax*obj.pulse_width_sec/obj.pri_sec);
     % give 1 way range, get 2 way delay
     oneWayRangeMetersToTwoWayDelaySec = @(range_m) 2*range_m/obj.c;
-    normalizedRxStart = ceil(oneWayRangeMetersToTwoWayDelaySec(obj.range_delay_m)*normalizedMax/obj.pri_sec);
+    normalizedRxStart = ceil(oneWayRangeMetersToTwoWayDelaySec(obj.scene_start_m)*normalizedMax/obj.pri_sec);
     normalizedRxStop = floor((oneWayRangeMetersToTwoWayDelaySec( ...
-        obj.range_delay_m + obj.range_swath_m)...
+        obj.scene_start_m + obj.range_swath_m)...
         + obj.pulse_width_sec)*normalizedMax/obj.pri_sec);
 
     tx_pulse(1:normalizedTxLength) = 1;

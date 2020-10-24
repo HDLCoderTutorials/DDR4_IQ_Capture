@@ -1,5 +1,5 @@
 classdef RadarSetup < handle & pl_config.Validator
-    %RadarSetup Takes desired radar settings and calculates pulse delays.
+    % RadarSetup Takes desired radar settings and calculates pulse delays.
     %   Calculate all state machine, ADC, DAC delays in terms of sample delays.
     %   Provide basic validation, as well as estimate of the data rate and
     %   storage required per pulse and per CPI.
@@ -17,18 +17,21 @@ classdef RadarSetup < handle & pl_config.Validator
     end
 
     properties
-        pl_synthesis_config % object containing fpga clock rate and sample rate, in Hz
-        pulses_per_cpi % Sets the number of contiguous pulses to capture in memeory per CPI trigger.
-        pri_sec % Define either prf_hz or pri_sec, not both. Must be long enough to allow ADC capture to complete.
-        pulse_width_sec
-        range_swath_m % Range swath in meters, note that this must be added to the pulse width in calculating the number of ADC samples.
-        % Range_Delay_m  is this to the start of the range swath or the
-        % middle?  Name makes it seem like the start.
-        range_delay_m % Start of range swath. Must be greater delay than the pulse width.
-        chirp_start_frequency_hz
-        chirp_stop_frequency_hz
-        % Output/Generated properties
-        pl_register_config % Object with config parameters for programable logic.
+        % pl_synthesis_config - Object containing fpga clock rate and sample rate, in Hz
+        pl_synthesis_config pl_config.SynthesisConfig
+        % pl_register_config - Output object with config parameters for programable logic.
+        pl_register_config pl_config.RegisterConfig
+        % pulses_per_cpi - Sets the number of contiguous pulses to capture in memeory per CPI trigger.
+        pulses_per_cpi double
+        % pri_sec - Define either prf_hz or pri_sec, not both. Must be long enough to allow ADC capture to complete.
+        pri_sec double
+        pulse_width_sec double
+        % range_swath_m - Range swath in meters, note that this must be added to the pulse width in calculating the time to capture for.
+        range_swath_m double
+        % scene_start_m - Start of range swath. Must be greater delay than the pulse width.
+        scene_start_m double
+        chirp_start_frequency_hz double
+        chirp_stop_frequency_hz double
     end
 
     properties (Dependent)
@@ -58,94 +61,19 @@ classdef RadarSetup < handle & pl_config.Validator
         
         
         function set.chirp_bandwidth_hz(obj,chirp_bandwidth_value)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Both Defined
-               center_freq_hz = obj.chirp_center_frequency_hz; 
-                obj.chirp_start_frequency_hz = center_freq_hz - chirp_bandwidth_value/2;
-                obj.chirp_stop_frequency_hz  = center_freq_hz + chirp_bandwidth_value/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Neither Defined
-                obj.chirp_start_frequency_hz = -chirp_bandwidth_value/2;
-                obj.chirp_stop_frequency_hz  = chirp_bandwidth_value/2;
-            else % One defined, either start or stop frequency
-                if obj.isPropertySingleton('chirp_start_frequency_hz',false) 
-                    % Only start frequency is defined, calculate the stop
-                    obj.chirp_stop_frequency_hz  = obj.chirp_start_frequency_hz ...
-                        + chirp_bandwidth_value;
-                elseif obj.isPropertySingleton('chirp_stop_frequency_hz',false)
-                    % Only the stop frequency is defined, calculate the start
-                    obj.chirp_start_frequency_hz = obj.chirp_stop_frequency_hz ...
-                        - chirp_bandwidth_value;
-                else
-                    error('Error should not be possible, start or stop frequency should be defined here.')
-                end
-            end
+            SET_chirp_bandwidth_hz(obj,chirp_bandwidth_value);
         end
 
         function chirp_bandwidth_value = get.chirp_bandwidth_hz(obj)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Both Defined
-                chirp_bandwidth_value = (obj.chirp_stop_frequency_hz - obj.chirp_start_frequency_hz);
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Neither Defined
-                chirp_bandwidth_value = [];
-            else % One defined, either start or stop frequency
-                chirp_bandwidth_value = [];
-            end
+            chirp_bandwidth_value = GET_chirp_bandwidth_hz(obj);
         end
 
         function set.chirp_center_frequency_hz(obj,chirp_center_frequency_hz_value)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Both Defined
-                chirp_bandwidth_hz_value = obj.chirp_bandwidth_hz;
-                obj.chirp_start_frequency_hz = chirp_center_frequency_hz_value ...
-                    - chirp_bandwidth_hz_value/2;
-                obj.chirp_stop_frequency_hz  = chirp_center_frequency_hz_value ...
-                    + chirp_bandwidth_hz_value/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Neither Defined
-                chirp_bandwidth_value = 100e3; % Arbitrary default value.
-                obj.chirp_start_frequency_hz = chirp_center_frequency_hz_value ...
-                    - chirp_bandwidth_value/2;
-                obj.chirp_stop_frequency_hz  = chirp_center_frequency_hz_value ...
-                    + chirp_bandwidth_value/2;
-            else % One defined, either start or stop frequency
-                if obj.isPropertySingleton('chirp_start_frequency_hz',false) 
-                    % Only start frequency is defined, calculate the stop
-                    chirp_bandwidth_value = 2*( chirp_center_frequency_hz_value ...
-                        - obj.chirp_start_frequency_hz);
-                    obj.chirp_stop_frequency_hz  = obj.chirp_start_frequency_hz ...
-                        + chirp_bandwidth_value;
-                elseif obj.isPropertySingleton('chirp_stop_frequency_hz',false)
-                    % Only the stop frequency is defined, calculate the start
-                    chirp_bandwidth_value = 2*( chirp_center_frequency_hz_value ...
-                        - obj.chirp_start_frequency_hz);
-                    obj.chirp_start_frequency_hz = obj.chirp_stop_frequency_hz ...
-                        - chirp_bandwidth_value;
-                else
-                    error('Error should not be possible, start or stop frequency should be defined here.')
-                end
-            end
+            SET_chirp_center_frequency_hz(obj,chirp_center_frequency_hz_value);
         end
 
         function chirp_center_frequency_hz_value = get.chirp_center_frequency_hz(obj)
-            if (obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Both Defined
-                chirp_center_frequency_hz_value = (obj.chirp_stop_frequency_hz + obj.chirp_start_frequency_hz)/2;
-            elseif (~obj.isPropertySingleton('chirp_start_frequency_hz',false) && ...
-                    ~obj.isPropertySingleton('chirp_stop_frequency_hz',false))
-                % Neither Defined
-                chirp_bandwidth_value = [];
-            else % One defined, either start or stop frequency
-                chirp_bandwidth_value = [];
-            end
+            chirp_center_frequency_hz_value = GET_chirp_center_frequency_hz(obj);
         end
         
         function valid = isValid(obj)
@@ -158,23 +86,12 @@ classdef RadarSetup < handle & pl_config.Validator
             %   their magnitude and relationship is reasonable.
             %   Otherwise, provides a helpful error message.
             
-            % Problem: Assert throws an error and halts execution.  It
-            % would be more helpful to throw an error after displaying
-            % warnings for ALL issues which fail validation.
-
             % Validate all properties except those excluded.
             assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),'Not all properties are both defined and singleton.')
             
             % Validate rfsoc_clock object
             assert(isa(obj.pl_synthesis_config,'pl_config.SynthesisConfig'),'pl_synthesis_config must be object of type pl_config.SynthesisConfig');
             assert(obj.pl_synthesis_config.isValid,'pl_synthesis_config object reported invalid settings.');
-
-            % Validate Radar programable logic configuration object
-            % (This is for output, so it doesn't need validation)
-%             assert(isa(obj.radar_pl_configuration,'pl_config.Radar_pl_configuration'),'radar_pl_configuration must be object of type pl_config.Radar_pl_configuration');
-%             assert(obj.radar_pl_configuration.isValid,'radar_pl_configuration object reported invalid settings.');
-
-
 
             % Valid if we get to this line without errors.
             valid = true;
@@ -214,6 +131,13 @@ classdef RadarSetup < handle & pl_config.Validator
     methods
         plot(obj)
         pl_register_config = getRadarPlConfig(obj)
+    end
+
+    methods (Hidden)
+        SET_chirp_bandwidth_hz(obj,chirp_bandwidth_value)
+        chirp_bandwidth_value = GET_chirp_bandwidth_hz(obj)
+        SET_chirp_center_frequency_hz(obj,chirp_center_frequency_hz_value)
+        chirp_center_frequency_hz_value = GET_chirp_center_frequency_hz(obj)
     end
     
     methods (Static)
