@@ -22,16 +22,19 @@ classdef RadarSetup < handle & pl_config.Validator
         % pl_register_config - Output object with config parameters for programable logic.
         pl_register_config pl_config.RegisterConfig
         % pulses_per_cpi - Sets the number of contiguous pulses to capture in memeory per CPI trigger.
-        pulses_per_cpi double
-        % pri_sec - Define either prf_hz or pri_sec, not both. Must be long enough to allow ADC capture to complete.
-        pri_sec double
-        pulse_width_sec double
-        % range_swath_m - Range swath in meters, note that this must be added to the pulse width in calculating the time to capture for.
-        range_swath_m double
+        pulses_per_cpi {mustBeInteger, mustBeGreaterThan(pulses_per_cpi,0)}
+        % pri_sec - Define either prf_hz or pri_sec, not both. 
+        %   Must be long enough to allow ADC capture to complete.
+        pri_sec(1,1) {mustBeNumeric} 
+        pulse_width_sec(1,1) {mustBeNumeric} 
+        % range_swath_m - Range swath in meters, 
+        %    note that this must be added to the pulse width 
+        %    in calculating the time to capture for.
+        range_swath_m(1,1) {mustBeNumeric} 
         % scene_start_m - Start of range swath. Must be greater delay than the pulse width.
-        scene_start_m double
-        chirp_start_frequency_hz double
-        chirp_stop_frequency_hz double
+        scene_start_m(1,1) {mustBeNumeric} 
+        chirp_start_frequency_hz(1,1) {mustBeNumeric} 
+        chirp_stop_frequency_hz(1,1) {mustBeNumeric} 
     end
 
     properties (Dependent)
@@ -43,7 +46,7 @@ classdef RadarSetup < handle & pl_config.Validator
     
     methods
         function obj = RadarSetup(varargin)
-            %SynthesisConfig Construct an instance of this class
+            % RadarSetup - Construct an instance of this class
             % Constructor accepts name/value pairs for all properties,
             % or can be called without arguments for an empty object.
             if (nargin>0)
@@ -87,15 +90,17 @@ classdef RadarSetup < handle & pl_config.Validator
             %   Otherwise, provides a helpful error message.
             
             % Validate all properties except those excluded.
-            assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),'Not all properties are both defined and singleton.')
+            assert(obj.allPropertiesAreSingletonAndDefined('exclude',obj.outputProperties),...
+                'Not all properties are both defined and singleton.')
             
             % Validate rfsoc_clock object
-            assert(isa(obj.pl_synthesis_config,'pl_config.SynthesisConfig'),'pl_synthesis_config must be object of type pl_config.SynthesisConfig');
-            assert(obj.pl_synthesis_config.isValid,'pl_synthesis_config object reported invalid settings.');
+            assert(isa(obj.pl_synthesis_config,'pl_config.SynthesisConfig'),...
+                'pl_synthesis_config must be object of type pl_config.SynthesisConfig');
+            assert(obj.pl_synthesis_config.isValid,...
+                'pl_synthesis_config object reported invalid settings.');
 
             % Valid if we get to this line without errors.
             valid = true;
-
         end
        
         function valid = isPulseTimingValid(obj)
@@ -107,12 +112,15 @@ classdef RadarSetup < handle & pl_config.Validator
             % Calculate Radar performance parameters
             warning('These calculatioins have not been verified')
             % Should validate that required properties have been defined
-%             assert(obj.allPropertiesAreSingletonAndDefined('include',{'pri_sec','pulse_width_sec'}) && ...
-%                 obj.allPropertiesAreDefined('include',{'pl_synthesis_config'}) && obj.pl_synthesis_config.isValid(), ...
-%             'Additional parameters must be defined before calculation is possible.');
+            % assert(obj.allPropertiesAreSingletonAndDefined('include',...
+            % {'pri_sec','pulse_width_sec'}) && obj.allPropertiesAreDefined('include',...
+            % {'pl_synthesis_config'}) && obj.pl_synthesis_config.isValid(), ...
+            % 'Additional parameters must be defined before calculation is possible.');
+
             % Intermediate parameters
-            recoveryTime = 0;      
-            ADC_sample_sec = (obj.pulse_width_sec + obj.range_swath_m / obj.c); % Pulse width time + range swath time
+            recoveryTime = 0;     
+            % Pulse width time + range swath time 
+            ADC_sample_sec = (obj.pulse_width_sec + obj.range_swath_m / obj.c); 
             samplesPerPulse = ADC_sample_sec  * obj.pl_synthesis_config.sample_rate_hz;
             bitsPerSample = 32; % Complex Samples
             % Generate outputs

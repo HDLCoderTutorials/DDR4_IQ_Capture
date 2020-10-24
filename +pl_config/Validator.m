@@ -186,6 +186,14 @@ classdef (Abstract) Validator < handle
            parsedPropertyCell = propertyNames( ~[mc.PropertyList.Constant] & ~[mc.PropertyList.Hidden] );
         end
 
+        function mustBeInRange(a,b)
+            if any(a(:) < b(1)) || any(a(:) > b(2))
+                error(['Value assigned to Data property is not in range ',...
+                    num2str(b(1)),'...',num2str(b(2))])
+            end
+        end
+        
+        
     end
     
     methods (Static)

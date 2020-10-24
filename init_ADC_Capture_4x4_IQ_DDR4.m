@@ -47,7 +47,6 @@ requiredVars{end+1} = 'RngSwathLength_count';
 RngSwathLength_count = RngSwathLength*fpga_clk_rate; % seconds * clocks per sec = fpga clock cycles
 
 requiredVars{end+1} = 'CaptureLength';
-CaptureLength = CPILength*RngSwathLength; % n*seconds = seconds
 CaptureLength = CPILength*RngSwathLength_count; % pulse_count * fpgaClockCycle_count
 
 requiredVars{end+1} = 'start_inc'; % NCO increments for fo and f1
@@ -117,7 +116,7 @@ requiredVars{end+1} = 'requiredVars'; % To aid debugging
 clearvars('-except',requiredVars{:})
 
 % Clear some required vars, show name and value of last cleared var
-replacedRequiredVars = requiredVars(1:4);
+replacedRequiredVars = requiredVars(1:7);
 disp('Last prelacement varaible:   ')
 eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
@@ -130,9 +129,13 @@ Fs = initObjects.synthesisConfig.sample_rate_hz; % Read.m
 VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
 CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
 N = initObjects.synthesisConfig.N_accumulator; % all over slx,
-% CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
+PRI_count = initObjects.pl_register_config.pri_cycles;
+PulseWidth_count = initObjects.pl_register_config.pulse_width_cycles;
+RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
+    - initObjects.pl_register_config.pulse_width_cycles;
 
 
+CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
 
 % Compile slx
 % ADC_Capture_4x4_IQ_DDR4([], [], [], 'compile')
