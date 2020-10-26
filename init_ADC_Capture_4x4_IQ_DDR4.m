@@ -113,7 +113,7 @@ clearvars('-except',requiredVars{:})
 
 
 % Clear some required vars, show name and value of last cleared var
-replacedRequiredVars = requiredVars(1:7);
+replacedRequiredVars = requiredVars(1:7); %12
 disp('Last prelacement varaible:   ')
 eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
@@ -132,8 +132,39 @@ PulseWidth_count = initObjects.pl_register_config.pulse_width_cycles;
 RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
     - initObjects.pl_register_config.pulse_width_cycles;
 
-
+% RngSwathLength_count = 
 CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
+% start_inc = 
+% end_inc = 
+% LFM_counter_inc = 
+
+%% Should be in the Counter Mask/Block Properties
+% https://www.mathworks.com/company/newsletters/articles/tips-and-tricks-tracking-variables-in-a-simulink-model.html
+% f = Simulink.findVars('ADC_Capture_4x4_IQ_DDR4','Name','N')
+issigned = 1; % 0 - unsigned, 1 - signed
+CountInit = 0;
+CountFracLen = 0;
+CountWordLen = N;
+freerun=1;
+CountFrom = 0;
+CountDir = 0; % 0-up, 1-down
+
+
+%% DDR plant model param - might be acceptable, should be in a structure
+DDRDataWidth = 128;
+DDRDepth = (RngSwathLength_count * CPILength) / (DDRDataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
+DDRDataType = fixdt(0,DDRDataWidth,0);
+DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
+
+%% Sim parameters - should be replaced by a second initObjects structure
+% with simulation specific changes.
+% Simulation specific parameters are fine, but they should be passed in 
+% through a uniform interface, instead of being another random global var.
+sim_CaptureLength = CaptureLength;
+sim_RdFrameSize = 64;
+sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
+
+
 
 % Compile slx
 % ADC_Capture_4x4_IQ_DDR4([], [], [], 'compile')
