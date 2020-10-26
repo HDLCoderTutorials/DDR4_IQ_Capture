@@ -99,9 +99,8 @@ sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 %% Cleanup parameters, testing to see which parameters are required.
 
 requiredVars{end+1} = 'requiredVars'; % To aid debugging
-% requiredVars{end+1} = 'plConfig';
-% plConfig = pl_config.RegisterConfig;
-
+% Clears all non-required vars
+clearvars('-except',requiredVars{:})
 % This clearvars line is used to clear all variables from the workspace
 % that aren't found in the clearvars cellarray. The objective is to verify
 % that the requiredVars array has correctly identified ALL variables
@@ -112,19 +111,18 @@ requiredVars{end+1} = 'requiredVars'; % To aid debugging
 % will be moved to the +pl_config.RadarSetup Class and this
 % script will be cleaned up.
 
-% Clears all non-required vars
-clearvars('-except',requiredVars{:})
 
 % Clear some required vars, show name and value of last cleared var
 replacedRequiredVars = requiredVars(1:7);
 disp('Last prelacement varaible:   ')
 eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
+
 % Generates all object oriented initialization objects, though 
 % not guaranteed to have the same input/initialization
 initObjects = initialize.initializeObjects();
 
-
+% Populate required variables from object oriented initialization
 Fs = initObjects.synthesisConfig.sample_rate_hz; % Read.m
 VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
 CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
