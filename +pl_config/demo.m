@@ -2,7 +2,7 @@
 
 clear all;
 pl = pl_config.RegisterConfig('pulse_width_cycles',100, ...
-'tx_delay_cycles',200,'adc_rx_samples',500,'after_rx_pri_delay_cycles',600, ...
+'rx_delay_cycles',200,'range_swath_cycles',500,'after_rx_pri_delay_cycles',600, ...
 'samples_per_clock_cycle',4)
 pl.isValid()
 metaclass(pl)
@@ -48,7 +48,7 @@ radarSetup.isValid()
 radarSetup.getRadarPerformance()
 radarSetup.plot()
 % This pl_config is the output for programming the fpga programable logic.
-pl_register_config = radarSetup.getRadarPlConfig() 
+pl_register_config = radarSetup.getRegisterConfig() 
 pl_register_config.isValid()
 
 

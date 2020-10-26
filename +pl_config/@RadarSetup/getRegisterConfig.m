@@ -1,4 +1,4 @@
-function pl_register_config = getRadarPlConfig(obj)
+function pl_register_config = getRegisterConfig(obj)
 % Calculate Programable Logic radar configuration parameters
 % from class properties. Validate integrity of inputs and
 % outputs before and after calculations.
@@ -7,7 +7,7 @@ function pl_register_config = getRadarPlConfig(obj)
 %
 % Generate and populate pl_config.RegisterConfig object
 
-warning(['getRadarPlConfig calculations are NOT complete. Proof of concept only.',...
+warning(['getRegisterConfig calculations are NOT complete. Proof of concept only.',...
     'Note that all values must be rounded to integers,',...
     ' but it would be good to account for rounding errors somewhere.'])
 % A dedicated Validator.round method might be helpful which both rounds to

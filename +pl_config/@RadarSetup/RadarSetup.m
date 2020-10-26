@@ -138,7 +138,7 @@ classdef RadarSetup < handle & pl_config.Validator
     
     methods
         plot(obj)
-        pl_register_config = getRadarPlConfig(obj)
+        pl_register_config = getRegisterConfig(obj)
     end
 
     methods (Hidden)
