@@ -85,10 +85,10 @@ CountDir = 0; % 0-up, 1-down
 
 %% DDR plant model param
 requiredVars={requiredVars{:},'DDRDataWidth','DDRDepth','DDRDataType','DDRInitData'};
-DDRDataWidth = 128;
-DDRDepth = (RngSwathLength_count * CPILength) / (DDRDataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
-DDRDataType = fixdt(0,DDRDataWidth,0);
-DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
+% DDRDataWidth = 128;
+% DDRDepth = (RngSwathLength_count * CPILength) / (DDRDataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
+% DDRDataType = fixdt(0,DDRDataWidth,0);
+% DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
 
 %% Sim parameters
 requiredVars={requiredVars{:},'sim_CaptureLength', 'sim_RdFrameSize', 'sim_RdNumFrames'};
@@ -134,8 +134,8 @@ RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
 
 % RngSwathLength_count = 
 CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
-% start_inc = 
-% end_inc = 
+start_inc = initObjects.pl_register_config.start_inc_steps; % compare values?
+end_inc = initObjects.pl_register_config.end_inc_steps; % compare values?
 % LFM_counter_inc = 
 
 %% Should be in the Counter Mask/Block Properties
@@ -151,10 +151,10 @@ CountDir = 0; % 0-up, 1-down
 
 
 %% DDR plant model param - might be acceptable, should be in a structure
-DDRDataWidth = 128;
-DDRDepth = (RngSwathLength_count * CPILength) / (DDRDataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
-DDRDataType = fixdt(0,DDRDataWidth,0);
-DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
+DDR.DataWidth = 128;
+DDR.Depth = (RngSwathLength_count * CPILength) / (DDR.DataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
+DDR.DataType = fixdt(0,DDR.DataWidth,0);
+DDR.InitData = fi(zeros(1,DDR.Depth),DDR.DataType);
 
 %% Sim parameters - should be replaced by a second initObjects structure
 % with simulation specific changes.
