@@ -139,6 +139,21 @@ sim_RdFrameSize = 64;
 sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 
 
+%% Compare original and final parameter calculations
 params.final = utilities.v2struct([{'fieldNames'},requiredVars]);
+% Create comparison cell array
+params.comparison = requiredVars;
+params.unequal = {};
+for ii=1:numel(requiredVars)
+    params.comparison{2,ii} = params.original.(params.comparison{1,ii});
+    params.comparison{3,ii} = params.final.(params.comparison{1,ii});
+    if (isa(params.comparison{2,ii},'numeric') && isa(params.comparison{3,ii},'numeric'))
+        if ( params.comparison{2,ii} ~= params.comparison{3,ii} )
+            params.unequal(1:3,end+1) = params.comparison(1:3,ii);
+        end
+    end
+end
+disp('Unequal Parameters')
+disp(params.unequal)
 % Compile slx
 % ADC_Capture_4x4_IQ_DDR4([], [], [], 'compile')
