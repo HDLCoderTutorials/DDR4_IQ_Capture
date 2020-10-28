@@ -6,18 +6,18 @@ requiredVars = {};
 ConverterSamplingRate = 2048e6;
 DDC_DUC_factor = 4;
 
-requiredVars{end+1} = 'Fs';
+% requiredVars{end+1} = 'Fs';
 Fs = ConverterSamplingRate/DDC_DUC_factor;
 Ts = 1/Fs; 
 
-requiredVars{end+1} = 'VectorSamplingFactor';
+% requiredVars{end+1} = 'VectorSamplingFactor';
 VectorSamplingFactor = 4;
 
 fpga_clk_rate = Fs/VectorSamplingFactor;
 fpga_Ts = 1/fpga_clk_rate;
 
 %% Pulse parameters
-requiredVars{end+1} = 'CPILength';
+% requiredVars{end+1} = 'CPILength';
 CPILength = 128; % pulses per CPI
 PRF = 10000; %Hz
 PulseWidth = 5e-6; % seconds
@@ -31,14 +31,14 @@ RngSwathLength = 4*PulseWidth * 1.25; % time in seconds of RX data to save each 
 f0 = 0e6;
 f1 = 140e6; 
 
-requiredVars{end+1} = 'N'; % HDL Counter max values 2^(N-1)-1
+% requiredVars{end+1} = 'N'; % HDL Counter max values 2^(N-1)-1
 N = 14;    % accum WL
 
 PRF_period = 1/PRF; % seconds
-requiredVars{end+1} = 'PRI_count';
+% requiredVars{end+1} = 'PRI_count';
 PRI_count = PRF_period*fpga_clk_rate;
 
-requiredVars{end+1} = 'PulseWidth_count';
+% requiredVars{end+1} = 'PulseWidth_count';
 PulseWidth_count = PulseWidth*fpga_clk_rate;
 
 requiredVars{end+1} = 'RngGateDelay_count';
@@ -95,8 +95,8 @@ clearvars('-except',requiredVars{:})
 
 params.original = utilities.v2struct([{'fieldNames'},requiredVars]);
 % Clear some required vars, show name and value of last cleared var
-replacedRequiredVars = requiredVars(1:15); %12
-disp('Last prelacement varaible:   ')
+replacedRequiredVars = requiredVars(1:end-1);
+% disp('Last prelacement varaible:   ')
 % eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
 clearvars('-except','requiredVars','params')
@@ -107,12 +107,12 @@ clearvars('-except','requiredVars','params')
 initObjects = initialize.initializeObjects();
 
 % Populate required variables from object oriented initialization
-Fs = initObjects.synthesisConfig.sample_rate_hz; % Read.m
-VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
-CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
-N = initObjects.synthesisConfig.N_accumulator; % all over slx,
-PRI_count = initObjects.pl_register_config.pri_cycles;
-PulseWidth_count = initObjects.pl_register_config.pulse_width_cycles;
+% Fs = initObjects.synthesisConfig.sample_rate_hz; % Read.m
+% VectorSamplingFactor = initObjects.synthesisConfig.samples_per_clock_cycle; % slx  'factor' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/NCO_Transmit1/Vectorized NCO'
+% CPILength = initObjects.radarSetup.pulses_per_cpi; % Read,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/Constant2,  'Value' in 'ADC_Capture_4x4_IQ_DDR4/HDL_IP/DefaultRegister6/Constant5' 
+% N = initObjects.synthesisConfig.N_accumulator; % all over slx,
+% PRI_count = initObjects.pl_register_config.pri_cycles;
+% PulseWidth_count = initObjects.pl_register_config.pulse_width_cycles;
 RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
     - initObjects.pl_register_config.pulse_width_cycles;
 
@@ -126,7 +126,9 @@ LFM_counter_inc = initObjects.pl_register_config.lfm_counter_inc; % Calculation 
 
 %% DDR plant model param - might be acceptable, should be in a structure
 DDR.DataWidth = 128;
-DDR.Depth = (RngSwathLength_count * CPILength) / (DDR.DataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
+DDR.Depth = (initObjects.pl_register_config.range_swath_cycles ...
+    * initObjects.radarSetup.pulses_per_cpi) ...
+    / (DDR.DataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
 DDR.DataType = fixdt(0,DDR.DataWidth,0);
 DDR.InitData = fi(zeros(1,DDR.Depth),DDR.DataType);
 
