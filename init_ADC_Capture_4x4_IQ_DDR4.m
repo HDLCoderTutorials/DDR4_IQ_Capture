@@ -75,20 +75,7 @@ fprintf('%.0fMHz %.0fMHz\n', f0/1e6, actual_end_freq);
 % These are the parameters to the masked subsystem HDL Counter
 requiredVars={requiredVars{:},'issigned','CountInit','CountFracLen',...
     'CountWordLen','freerun','CountFrom','CountDir'};
-% issigned = 1; % 0 - unsigned, 1 - signed
-% CountInit = 0;
-% CountFracLen = 0;
-% CountWordLen = N;
-% freerun=1;
-% CountFrom = 0;
-% CountDir = 0; % 0-up, 1-down
 
-%% DDR plant model param
-% requiredVars={requiredVars{:},'DDRDataWidth','DDRDepth','DDRDataType','DDRInitData'};
-% DDRDataWidth = 128;
-% DDRDepth = (RngSwathLength_count * CPILength) / (DDRDataWidth/(2*16)) * 1.25; % Number of 16 bit I and Q samples collect + 25%
-% DDRDataType = fixdt(0,DDRDataWidth,0);
-% DDRInitData = fi(zeros(1,DDRDepth),DDRDataType);
 
 %% Sim parameters
 requiredVars={requiredVars{:},'sim_CaptureLength', 'sim_RdFrameSize', 'sim_RdNumFrames'};
@@ -132,22 +119,12 @@ PulseWidth_count = initObjects.pl_register_config.pulse_width_cycles;
 RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
     - initObjects.pl_register_config.pulse_width_cycles;
 
-% RngSwathLength_count = 
+% Seems redundant with CaptureLength... what was the difference?
+RngSwathLength_count = initObjects.pl_register_config.range_swath_cycles;
 CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
 start_inc = initObjects.pl_register_config.start_inc_steps; % compare values?
 end_inc = initObjects.pl_register_config.end_inc_steps; % compare values?
 % LFM_counter_inc = 
-
-%% Should be in the Counter Mask/Block Properties
-% https://www.mathworks.com/company/newsletters/articles/tips-and-tricks-tracking-variables-in-a-simulink-model.html
-% f = Simulink.findVars('ADC_Capture_4x4_IQ_DDR4','Name','N')
-% issigned = 1; % 0 - unsigned, 1 - signed
-% CountInit = 0;
-% CountFracLen = 0;
-% CountWordLen = N;
-% freerun=1;
-% CountFrom = 0;
-% CountDir = 0; % 0-up, 1-down
 
 
 %% DDR plant model param - might be acceptable, should be in a structure
