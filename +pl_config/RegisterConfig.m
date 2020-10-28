@@ -24,6 +24,12 @@ classdef RegisterConfig < handle & pl_config.Validator
         samples_per_clock_cycle  {mustBeInteger, mustBeGreaterThan(samples_per_clock_cycle,0)}
         start_inc_steps {mustBeInteger} % Initial NCO LFM increment
         end_inc_steps {mustBeInteger}   % Final NCO LFM increment
+        % lfm_counter_inc - lfm NCO phase increment counter increment
+        % NCO increment shows the phase rate for constant frequency
+        % lfm_counter_inc gives the increment rate for the phase increment 
+        % to describe a Linear Frequency Modulation (LFM)
+        lfm_counter_inc {mustBeInteger}
+        
     end
 
     methods

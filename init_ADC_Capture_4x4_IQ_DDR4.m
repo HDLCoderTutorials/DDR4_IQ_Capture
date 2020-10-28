@@ -71,12 +71,6 @@ actual_end_freq = end_inc/(2^(N-1)-1)*256;
 fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
 fprintf('%.0fMHz %.0fMHz\n', f0/1e6, actual_end_freq);
 
-% LFM Counter setup
-% These are the parameters to the masked subsystem HDL Counter
-requiredVars={requiredVars{:},'issigned','CountInit','CountFracLen',...
-    'CountWordLen','freerun','CountFrom','CountDir'};
-
-
 %% Sim parameters
 requiredVars={requiredVars{:},'sim_CaptureLength', 'sim_RdFrameSize', 'sim_RdNumFrames'};
 sim_CaptureLength = CaptureLength;
@@ -99,11 +93,14 @@ clearvars('-except',requiredVars{:})
 % script will be cleaned up.
 
 
+params.original = utilities.v2struct([{'fieldNames'},requiredVars]);
 % Clear some required vars, show name and value of last cleared var
-replacedRequiredVars = requiredVars(1:7); %12
+replacedRequiredVars = requiredVars(1:15); %12
 disp('Last prelacement varaible:   ')
-eval(replacedRequiredVars{end})
+% eval(replacedRequiredVars{end})
 clearvars(replacedRequiredVars{:})
+clearvars('-except','requiredVars','params')
+
 
 % Generates all object oriented initialization objects, though 
 % not guaranteed to have the same input/initialization
@@ -124,7 +121,7 @@ RngSwathLength_count = initObjects.pl_register_config.range_swath_cycles;
 CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
 start_inc = initObjects.pl_register_config.start_inc_steps; % compare values?
 end_inc = initObjects.pl_register_config.end_inc_steps; % compare values?
-% LFM_counter_inc = 
+LFM_counter_inc = initObjects.pl_register_config.lfm_counter_inc; % Calculation seems to match
 
 
 %% DDR plant model param - might be acceptable, should be in a structure
@@ -142,6 +139,6 @@ sim_RdFrameSize = 64;
 sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 
 
-
+params.final = utilities.v2struct([{'fieldNames'},requiredVars]);
 % Compile slx
 % ADC_Capture_4x4_IQ_DDR4([], [], [], 'compile')

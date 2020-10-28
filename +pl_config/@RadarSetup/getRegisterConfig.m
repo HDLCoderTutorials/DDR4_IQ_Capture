@@ -47,6 +47,8 @@ fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
 fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
     pl_register_config.end_inc_steps);
 
+% LFM_counter_inc added without modification
+pl_register_config.lfm_counter_inc = LFM_counter_inc;
 assert(pl_register_config.isValid(),'Radar Programable Logic Configuration object is not valid')
 obj.pl_register_config = pl_register_config;
 end
