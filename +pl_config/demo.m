@@ -2,7 +2,7 @@
 
 clear all;
 pl = pl_config.RegisterConfig('pulse_width_cycles',100, ...
-'tx_delay_cycles',200,'adc_rx_samples',500,'after_rx_pri_delay_cycles',600, ...
+'rx_delay_cycles',200,'range_swath_cycles',500,'after_rx_pri_delay_cycles',600, ...
 'samples_per_clock_cycle',4)
 pl.isValid()
 metaclass(pl)
@@ -40,7 +40,7 @@ synthesisConfig = pl_config.SynthesisConfig('fpga_clock_rate_hz',128e6,...
 synthesisConfig.isValid();
 
 radarSetup = pl_config.RadarSetup('pulses_per_cpi',1024,'pulse_width_sec',1e-6,'prf_hz',20e3,...
-    'range_delay_m',200,'range_swath_m',1000,...
+    'scene_start_m',200,'range_swath_m',1000,...
     'chirp_start_frequency_hz',-100e6,'chirp_stop_frequency_hz',100e6,...
     'pl_synthesis_config',synthesisConfig)
     
@@ -48,7 +48,7 @@ radarSetup.isValid()
 radarSetup.getRadarPerformance()
 radarSetup.plot()
 % This pl_config is the output for programming the fpga programable logic.
-pl_register_config = radarSetup.getRadarPlConfig() 
+pl_register_config = radarSetup.getRegisterConfig() 
 pl_register_config.isValid()
 
 
