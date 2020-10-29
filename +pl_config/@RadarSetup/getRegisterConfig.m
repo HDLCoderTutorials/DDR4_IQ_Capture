@@ -1,4 +1,4 @@
-function pl_register_config = getRegisterConfig(obj)
+function register_config = getRegisterConfig(obj)
 % Calculate Programable Logic radar configuration parameters
 % from class properties. Validate integrity of inputs and
 % outputs before and after calculations.
@@ -14,41 +14,92 @@ warning(['getRegisterConfig calculations are NOT complete. Proof of concept only
 % the nearest integer AND records the rounding error, and possibly back
 % modifies the source properties to match the integer rounding.
 assert(obj.isInputValid(),'Input parameters are not sufficient ')
-synthConfig = obj.pl_synthesis_config; % Make local copy to shorten name.
 
-regConfigInput.pri_cycles = round(obj.pri_sec*synthConfig.fpga_clock_rate_hz);
-regConfigInput.pulse_width_cycles = obj.pulse_width_sec * synthConfig.fpga_clock_rate_hz;
+%% Variable Setup
+sc = obj.pl_synthesis_config; % Make local copy to shorten name.
+clock_hz = sc.fpga_clock_rate_hz;
+N = sc.N_accumulator;
+isInteger = @(number) mod(number,1) == 0;
+areParametersRounded = false; % flag can be flipped by functions below.
+
+%% Parameter calculations
+[rcIn.pri_cycles, rounded.pri_sec] = GET_pri_cycles();
+[rcIn.pulse_width_cycles, rounded.pulse_width_sec] = GET_pulse_width_sec();
+
 % tx_delay_cycles is the delay between transmit and 
-regConfigInput.rx_delay_cycles = ...
-    round( 2*obj.scene_start_m/obj.c * synthConfig.fpga_clock_rate_hz );
-regConfigInput.range_swath_cycles = ...
-    round( (obj.range_swath_m/3e8 + obj.pulse_width_sec) * synthConfig.fpga_clock_rate_hz);
-regConfigInput.after_rx_pri_delay_cycles = 200;
-regConfigInput.samples_per_clock_cycle = synthConfig.samples_per_clock_cycle;
-% Convert regConfigInput to cell name/value pairs, then to RegisterConfig object.
-regConfCell = pl_config.Validator.struct2NameValuePairCellArray(regConfigInput);
-pl_register_config = pl_config.RegisterConfig(regConfCell{:});
+rcIn.rx_delay_cycles = ...
+    round( 2*obj.scene_start_m/obj.c * clock_hz );
+rcIn.range_swath_cycles = ...
+    round( (obj.range_swath_m/3e8 + obj.pulse_width_sec) * clock_hz);
+rcIn.after_rx_pri_delay_cycles = 200;
+rcIn.samples_per_clock_cycle = sc.samples_per_clock_cycle;
 
-N = synthConfig.N_accumulator;
-pl_register_config.start_inc_steps = round (((obj.chirp_start_frequency_hz*2^N)...
-    /synthConfig.fpga_clock_rate_hz)/synthConfig.samples_per_clock_cycle);
-pl_register_config.end_inc_steps  = round (((obj.chirp_stop_frequency_hz*2^N)...
-    /synthConfig.fpga_clock_rate_hz)/synthConfig.samples_per_clock_cycle);
 
-%Pulse width and frequencies must be chosen so that LFM_counter_inc is an
+rcIn.start_inc_steps = round (((obj.chirp_start_frequency_hz*2^N)...
+    /clock_hz)/sc.samples_per_clock_cycle);
+rcIn.end_inc_steps  = round (((obj.chirp_stop_frequency_hz*2^N)...
+    /clock_hz)/sc.samples_per_clock_cycle);
+
+%Pulse width and frequencies must be chosen so that lfm_counter_inc is an
 %integer, will use floor here which changes end freq to slightly less in
 %some cases
-LFM_counter_inc = floor((pl_register_config.end_inc_steps-pl_register_config.start_inc_steps)/...
-    pl_register_config.pulse_width_cycles);
+rcIn.lfm_counter_inc = floor((rcIn.end_inc_steps-rcIn.start_inc_steps)/...
+    rcIn.pulse_width_cycles);
 % adjust end_inc for counter limitation
-end_inc = pl_register_config.start_inc_steps + LFM_counter_inc*pl_register_config.pulse_width_cycles;
-pl_register_config.end_inc_steps = round( end_inc/(2^(N-1)-1)*256 );
+end_inc = rcIn.start_inc_steps + rcIn.lfm_counter_inc*rcIn.pulse_width_cycles;
+rcIn.end_inc_steps = round( end_inc/(2^(N-1)-1)*256 );
 fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
 fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
-    pl_register_config.end_inc_steps);
+    rcIn.end_inc_steps);
 
-% LFM_counter_inc added without modification
-pl_register_config.lfm_counter_inc = LFM_counter_inc;
-assert(pl_register_config.isValid(),'Radar Programable Logic Configuration object is not valid')
-obj.pl_register_config = pl_register_config;
+
+% Create and validate register config object
+register_config = pl_config.RegisterConfig(rcIn);
+assert(register_config.isValid(),'Radar Programable Logic Configuration object is not valid')
+obj.pl_register_config = register_config; % reference register_config in RadarSetup
+
+if(areParametersRounded)
+    disp('Rounding was required to generate integer clock cycles.' ,...
+        'Equivelent RadarSetup input parameters that would work without ',...
+        'rounding have been recorded.')
+    disp(rounded)
+end
+
+dummy()
+
+
+    function myReturn = dummy()
+        disp('dummy function works')
+        myReturn = 42;
+    end
+
+    function [pri_cycles, pri_sec] = GET_pri_cycles()
+        pri_cycles = obj.pri_sec*clock_hz;
+        if( isInteger( pri_cycles ))
+            pri_sec = obj.pri_sec; % and pri_cycles doesnt need rounding
+        else
+            areParametersRounded = true; % Sloppy way to flag....
+            pri_cycles = round( pri_cycles );
+            pri_sec = pri_cycles / clock_hz;
+        end
+    end
+
+    function [pulse_width_cycles, pulse_width_sec] = GET_pulse_width_sec()
+        pulse_width_cycles = obj.pulse_width_sec * clock_hz;
+        if( isInteger( pulse_width_cycles ))
+            pulse_width_sec = obj.pulse_width_sec;
+        else
+            areParametersRounded = true;
+            pulse_width_cycles = round( pulse_width_cycles );
+            pulse_width_sec = pulse_width_cycles / clock_hz;            
+        end
+    end
+
+    % New Function: Round and back propagate
+    % Arguments:
+    % output parameter for RegisterConfig, input parameter from RadarSetup
+    % function handle to calculate destination RegisterConfig parameter (integer)
+    % function handle to calculate source RadarSetup parameter (non-integer)
+    % Behavior: 
+
 end

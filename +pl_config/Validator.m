@@ -2,7 +2,7 @@ classdef (Abstract) Validator < handle
     %Validator Abstract class with methods to aid validation
     %
 
-    methods
+    methods (Hidden)
 
         function defined = isPropertyDefined(obj,propertyName,showErrors)
             if ~exist('showErrors','var'); showErrors = true; end
@@ -185,15 +185,7 @@ classdef (Abstract) Validator < handle
            % Logical indexing for non-constant non-hidden properties
            parsedPropertyCell = propertyNames( ~[mc.PropertyList.Constant] & ~[mc.PropertyList.Hidden] );
         end
-
-        function mustBeInRange(a,b)
-            if any(a(:) < b(1)) || any(a(:) > b(2))
-                error(['Value assigned to Data property is not in range ',...
-                    num2str(b(1)),'...',num2str(b(2))])
-            end
-        end
-        
-        
+              
     end
     
     methods (Static)
@@ -202,8 +194,15 @@ classdef (Abstract) Validator < handle
             fieldValues = struct2cell(s);
             cellOut = cell(1, 2 * numel(fieldValues) );
             for iField = 1:numel(fieldNames)
-               cellOut{iField*2 - 1} = fieldNames{iField};
-               cellOut{iField*2} = fieldValues{iField};
+                cellOut{iField*2 - 1} = fieldNames{iField};
+                cellOut{iField*2} = fieldValues{iField};
+            end
+        end
+        
+        function mustBeInRange(a,b)
+            if any(a(:) < b(1)) || any(a(:) > b(2))
+                error(['Value assigned to Data property is not in range ',...
+                    num2str(b(1)),'...',num2str(b(2))])
             end
         end
     end
