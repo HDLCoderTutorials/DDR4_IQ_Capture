@@ -30,8 +30,8 @@ areParametersRounded = false; % flag can be flipped by functions below.
 rcIn.rx_delay_cycles = ...
     round( 2*obj.scene_start_m/obj.c * clock_hz );
 rcIn.range_swath_cycles = ...
-    round( (obj.range_swath_m/3e8 + obj.pulse_width_sec) * clock_hz);
-rcIn.after_rx_pri_delay_cycles = 200;
+    round( (obj.range_swath_m/obj.c + obj.pulse_width_sec) * clock_hz);
+rcIn.after_rx_pri_delay_cycles = rcIn.pri_cycles - rcIn.pulse_width_cycles - rcIn.rx_delay_cycles;
 rcIn.samples_per_clock_cycle = sc.samples_per_clock_cycle;
 
 
@@ -67,6 +67,25 @@ end
 
 dummy()
 
+    % registerParam, toRegisterFcn, radarParam, toRadarFcn
+    mapStruct=struct(...
+        'registerParam','pri_cycles','toRegisterFcn',@(pri_sec) pri_sec*clock_hz,...
+        'radarParam','pri_sec','toRadarFcn',@(pri_cycles) pri_cycles / clock_hz);
+
+
+   mapCell = [ ... 
+    {'registerParam','toRegisterFcn','radarParam','toRadarFcn'};
+    {'pri_cycles',@(pri_sec) pri_sec*clock_hz,...
+    'pri_sec',@(pri_cycles) pri_cycles / clock_hz};
+    {'pulse_width_cycles',@(pulse_width_sec) pulse_width_sec * clock_hz,...
+    'pulse_width_sec',@(pulse_width_cycles) pulse_width_cycles / clock_hz};...
+    {'rx_delay_cycles',@(scene_start_m) scene_start_m / obj.c * clock_hz,...
+    'scene_start_m',@(rx_delay_cycles)  rx_delay_cycles * obj.c / clock_hz};...
+    {'range_swath_cycles',@(range_swath_m) (range_swath_m/obj.c + obj.pulse_width_sec) * clock_hz,...
+    'range_swath_m',@(range_swath_cycles) (range_swath_cycles/clock_hz - obj.pulse_width_sec) * obj.c };...
+    ];
+
+
 
     function myReturn = dummy()
         disp('dummy function works')
@@ -101,5 +120,40 @@ dummy()
     % function handle to calculate destination RegisterConfig parameter (integer)
     % function handle to calculate source RadarSetup parameter (non-integer)
     % Behavior: 
+
+
+    function [registerParamStruct, radarParamStruct] = ...
+            convertRoundAndReflectRegisterConfigParams(conversionStruct)
+    % Calculate RegisterConfig parameters from RadarSetup parameters, 
+    % rounding as required to conform to the integer only interface of the FPGA
+    % registers populated by RegisterConfig.
+    % When rounding is required to enforce integer only parameters, a mismatch
+    % occures between the real world meaning of the RegisterConfig and
+    % RadarSetup parameters. To prevent this mismatch, the true rounded 
+    % FPGA RegisterConfig value is converted back to the human readable
+    % RadarSetup parameter so performance calculations are accurate.
+    %
+    % conversionStruct input parameters:
+    % registerParam, toRegisterFcn, radarParam, toRadarFcn
+    %
+    % registerParam
+    %   registerConfig parameter name, can be used to populate a struct.
+    % toRegisterFcn
+    %   function handle which converts radarParam to registerParam
+    % radarParam
+    %   RadarConfig object parameter name, 
+    % toRadarFcn
+    %   function handle which converts registerParam to radarParam
+    %
+    % Output Parameters
+    % [registerParamStruct, radarParamStruct] output of conversion after rounding.
+    % 
+    % Self Validation
+    % Inputs property names must members of RadarSetup or RegisterConfig
+    % Conversion functions must be inverse functions of one another.
+
+
+
+    end
 
 end
