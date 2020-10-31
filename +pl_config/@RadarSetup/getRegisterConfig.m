@@ -46,11 +46,11 @@ rcIn.end_inc_steps  = round (((obj.chirp_stop_frequency_hz*2^N)...
 rcIn.lfm_counter_inc = floor((rcIn.end_inc_steps-rcIn.start_inc_steps)/...
     rcIn.pulse_width_cycles);
 % adjust end_inc for counter limitation
-end_inc = rcIn.start_inc_steps + rcIn.lfm_counter_inc*rcIn.pulse_width_cycles;
-rcIn.end_inc_steps = round( end_inc/(2^(N-1)-1)*256 );
+rcIn.end_inc_steps = rcIn.start_inc_steps + rcIn.lfm_counter_inc*rcIn.pulse_width_cycles;
+end_inc_actual_MHz = round( rcIn.end_inc_steps/(2^(N-1)-1)*256 );
 fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
 fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
-    rcIn.end_inc_steps);
+    end_inc_actual_MHz);
 
 
 % Create and validate register config object
@@ -65,9 +65,13 @@ if(areParametersRounded)
     disp(rounded)
 end
 
-dummy()
+% [mapStruct mapCell] = mapParameters();
 
+
+
+    function [mapStruct, mapCell] = mapParameters()
     % registerParam, toRegisterFcn, radarParam, toRadarFcn
+
     mapStruct=struct(...
         'registerParam','pri_cycles','toRegisterFcn',@(pri_sec) pri_sec*clock_hz,...
         'radarParam','pri_sec','toRadarFcn',@(pri_cycles) pri_cycles / clock_hz);
@@ -84,12 +88,6 @@ dummy()
     {'range_swath_cycles',@(range_swath_m) (range_swath_m/obj.c + obj.pulse_width_sec) * clock_hz,...
     'range_swath_m',@(range_swath_cycles) (range_swath_cycles/clock_hz - obj.pulse_width_sec) * obj.c };...
     ];
-
-
-
-    function myReturn = dummy()
-        disp('dummy function works')
-        myReturn = 42;
     end
 
     function [pri_cycles, pri_sec] = GET_pri_cycles()

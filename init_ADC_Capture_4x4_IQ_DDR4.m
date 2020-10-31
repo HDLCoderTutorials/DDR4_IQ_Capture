@@ -53,21 +53,15 @@ requiredVars{end+1} = 'start_inc'; % NCO increments for fo and f1
 start_inc = round (((f0*2^N)/fpga_clk_rate)/VectorSamplingFactor);
 requiredVars{end+1} = 'end_inc';
 end_inc = round (((f1*2^N)/fpga_clk_rate)/VectorSamplingFactor);
-
-
 %Pulse width and frequencies must be chosen so that LFM_counter_inc is an
 %integer, will use floor here which changes end freq to slightly less in
 %some cases
-
 requiredVars{end+1} = 'LFM_counter_inc';
 LFM_counter_inc = floor((end_inc-start_inc)/PulseWidth_count);
-
 % adjust end_inc for counter limitation
-
 end_inc = start_inc + LFM_counter_inc*PulseWidth_count;
 
 actual_end_freq = end_inc/(2^(N-1)-1)*256;
-
 fprintf('Calculated chirp frequencies based on integer counter limitation:\n');
 fprintf('%.0fMHz %.0fMHz\n', f0/1e6, actual_end_freq);
 
@@ -118,7 +112,8 @@ RngGateDelay_count = initObjects.pl_register_config.rx_delay_cycles ...
 
 % Seems redundant with CaptureLength... what was the difference?
 RngSwathLength_count = initObjects.pl_register_config.range_swath_cycles;
-CaptureLength = initObjects.pl_register_config.range_swath_cycles; % Read.m, 
+CaptureLength        = initObjects.pl_register_config.range_swath_cycles ...
+    * initObjects.radarSetup.pulses_per_cpi; % Read.m, 
 start_inc = initObjects.pl_register_config.start_inc_steps; % compare values?
 end_inc = initObjects.pl_register_config.end_inc_steps; % compare values?
 LFM_counter_inc = initObjects.pl_register_config.lfm_counter_inc; % Calculation seems to match
