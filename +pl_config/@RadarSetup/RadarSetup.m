@@ -9,7 +9,7 @@ classdef RadarSetup < handle & pl_config.Validator
     properties (Hidden,Constant)
         c = 299792458
         % These properties are not required inputs for producing pl_config.
-        outputProperties = {'pl_register_config'}
+        outputProperties = {'registerConfig'}
     end
 
     properties (Hidden)
@@ -19,8 +19,8 @@ classdef RadarSetup < handle & pl_config.Validator
     properties
         % pl_synthesis_config - Object containing fpga clock rate and sample rate, in Hz
         pl_synthesis_config pl_config.SynthesisConfig
-        % pl_register_config - Output object with config parameters for programable logic.
-        pl_register_config pl_config.RegisterConfig
+        % registerConfig - Output object with config parameters for programable logic.
+        registerConfig pl_config.RegisterConfig
         % pulses_per_cpi - Sets the number of contiguous pulses to capture in memeory per CPI trigger.
         pulses_per_cpi {mustBeInteger, mustBeGreaterThan(pulses_per_cpi,0)}
         % pri_sec - Define either prf_hz or pri_sec, not both. 
@@ -138,7 +138,7 @@ classdef RadarSetup < handle & pl_config.Validator
     
     methods
         plot(obj)
-        pl_register_config = getRegisterConfig(obj)
+        registerConfig = getRegisterConfig(obj)
     end
 
     methods (Hidden)

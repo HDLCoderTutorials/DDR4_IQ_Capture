@@ -25,7 +25,7 @@ assert(output.radarSetup.isValid(),'Radar Setup Failed validation.')
 % output.radarSetup.plot()
 %% Register Config Initialization
 % This pl_config is the output for programming the fpga programable logic.
-output.pl_register_config = output.radarSetup.getRegisterConfig();
-assert(output.pl_register_config.isValid(),'PL Register Config Failed validation.')
+output.registerConfig = output.radarSetup.getRegisterConfig();
+assert(output.registerConfig.isValid(),'PL Register Config Failed validation.')
 
 

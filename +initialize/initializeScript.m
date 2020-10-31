@@ -32,5 +32,5 @@ assert(radarSetup.isValid(),'Radar Setup Failed validation.')
 radarSetup.getRadarPerformance()
 radarSetup.plot()
 % This pl_config is the output for programming the fpga programable logic.
-pl_register_config = radarSetup.getRegisterConfig() 
-assert(pl_register_config.isValid(),'PL Register Config Failed validation.')
+registerConfig = radarSetup.getRegisterConfig() 
+assert(registerConfig.isValid(),'PL Register Config Failed validation.')

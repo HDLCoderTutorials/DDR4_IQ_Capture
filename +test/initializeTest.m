@@ -26,8 +26,8 @@ radarSetup.isValid()
 radarSetup.getRadarPerformance()
 radarSetup.plot()
 % This pl_config is the output for programming the fpga programable logic.
-pl_register_config = radarSetup.getRegisterConfig() 
-pl_register_config.isValid()
+registerConfig = radarSetup.getRegisterConfig() 
+registerConfig.isValid()
     
     
     

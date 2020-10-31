@@ -56,7 +56,7 @@ fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
 % Create and validate register config object
 register_config = pl_config.RegisterConfig(rcIn);
 assert(register_config.isValid(),'Radar Programable Logic Configuration object is not valid')
-obj.pl_register_config = register_config; % reference register_config in RadarSetup
+obj.registerConfig = register_config; % reference register_config in RadarSetup
 
 if(areParametersRounded)
     disp('Rounding was required to generate integer clock cycles.' ,...

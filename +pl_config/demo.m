@@ -48,12 +48,12 @@ radarSetup.isValid()
 radarSetup.getRadarPerformance()
 radarSetup.plot()
 % This pl_config is the output for programming the fpga programable logic.
-pl_register_config = radarSetup.getRegisterConfig() 
-pl_register_config.isValid()
+registerConfig = radarSetup.getRegisterConfig() 
+registerConfig.isValid()
 
 
 % Manual way of making a programable logic configuration object:
-% pl_register_config = pl_config.Radar_pl_configuration('pulse_width_cycles',100,'tx_delay_cycles',100,...
+% registerConfig = pl_config.Radar_pl_configuration('pulse_width_cycles',100,'tx_delay_cycles',100,...
 %     'adc_rx_samples',1000,'after_rx_pri_delay_cycles',200,'samples_per_clock_cycle',4)
 
 
