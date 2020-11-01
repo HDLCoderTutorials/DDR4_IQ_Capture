@@ -33,6 +33,7 @@ rcIn.range_swath_cycles = ...
     round( (obj.range_swath_m/obj.c + obj.pulse_width_sec) * clock_hz);
 rcIn.after_rx_pri_delay_cycles = rcIn.pri_cycles - rcIn.pulse_width_cycles - rcIn.rx_delay_cycles;
 rcIn.samples_per_clock_cycle = sc.samples_per_clock_cycle;
+rcIn.pulses_per_cpi = obj.pulses_per_cpi; % pulses_per_cpi is copied right from RadarSetup
 
 
 rcIn.start_inc_steps = round (((obj.chirp_start_frequency_hz*2^N)...

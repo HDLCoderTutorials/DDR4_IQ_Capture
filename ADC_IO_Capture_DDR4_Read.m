@@ -28,17 +28,18 @@ if DebugMode
 else
     YScale = [-3500, 3500];
 end
-hScope = dsp.TimeScope(1, Fs,...
+hScope = dsp.TimeScope(1, initObjects.synthesisConfig.sample_rate_hz,...
                     'TimeSpanSource', 'Auto', ...
                     'AxesScaling', 'Manual',...
                     'YLimits', YScale,...
                     'LayoutDimensions', [1 1]);
 hSpecAn = dsp.SpectrumAnalyzer( ...
-                    'SampleRate', Fs);
+                    'SampleRate', initObjects.synthesisConfig.sample_rate_hz);
 hSpecAn.FrequencyResolutionMethod = 'Windowlength';
 hSpecAn.PlotMaxHoldTrace = false;
 hSpecAn.PlotNormalTrace = true;
-hSpecAn.WindowLength = CaptureLength/CPILength*4; %Capturelength/CPILength is the first pulse, just look at first 4
+% Capturelength/CPILength is the first pulse, just look at first 4
+hSpecAn.WindowLength = CaptureLength/initObjects.radarSetup.pulses_per_cpi*4; 
 hSpecAn.Window = 'Rectangular';
 hSpecAn.ViewType  = 'Spectrum and spectrogram'
 
@@ -208,9 +209,9 @@ AXI4_DDR4_ReadFrameLen(DDR4_ReadLen);
 AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
 AXI4_DDR4_ReadTrigger(false); % do not trigger
 % Radar parameters
-AXI4_CPILength(CPILength);
-AXI4_PulseWidth(PulseWidth_count);
-AXI4_PRI(PRI_count);
+AXI4_CPILength(initObjects.registerConfig.pulses_per_cpi);
+AXI4_PulseWidth(initObjects.registerConfig.pulse_width_cycles);
+AXI4_PRI(initObjects.registerConfig.pri_cycles);
 AXI4_RngGateDelay(RngGateDelay_count);
 AXI4_RngSwathLength(RngSwathLength_count);
 
