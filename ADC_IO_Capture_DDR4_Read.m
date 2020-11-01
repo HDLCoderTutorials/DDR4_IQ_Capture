@@ -4,7 +4,7 @@ init_ADC_Capture_4x4_IQ_DDR4
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
 
-DDR4_ReadLen = CaptureLength;
+DDR4_ReadLen = initObjects.registerConfig.ddr4_samples;
 
 % Debug mode:
 % If set to true, we capture counter data which is a ramp from 1 to N
@@ -19,7 +19,7 @@ DebugMode = 0;
 %                   'Timeout',0);
 % setup(AXI4SReadObj);
 
-rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType','int16');
+rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType',initObjects.registerConfig.ddr4_data_type);
 
 %% Scopes
 
@@ -39,7 +39,7 @@ hSpecAn.FrequencyResolutionMethod = 'Windowlength';
 hSpecAn.PlotMaxHoldTrace = false;
 hSpecAn.PlotNormalTrace = true;
 % Capturelength/CPILength is the first pulse, just look at first 4
-hSpecAn.WindowLength = CaptureLength/initObjects.radarSetup.pulses_per_cpi*4; 
+hSpecAn.WindowLength = DDR4_ReadLen/initObjects.radarSetup.pulses_per_cpi*4; 
 hSpecAn.Window = 'Rectangular';
 hSpecAn.ViewType  = 'Spectrum and spectrogram'
 
@@ -195,15 +195,15 @@ setup(AXI4_RngSwathLength,uint32(0));
 % Channel Select
 step(AXI4_ADC_SelectCh,0); 
 % NCO values 
-AXI4_NCO_incr(start_inc);
-AXI4_NCO_end_incr(end_inc);
-AXI4_NCO_step_value(LFM_counter_inc);
+AXI4_NCO_incr(initObjects.registerConfig.start_inc_steps);
+AXI4_NCO_end_incr(initObjects.registerConfig.end_inc_steps);
+AXI4_NCO_step_value(initObjects.registerConfig.lfm_counter_inc);
 
 AXI4_NCO_DAC_I_Gain(1);
 AXI4_NCO_DAC_Q_Gain(1);
 
 AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
-AXI4_ADC_CaptureLength(CaptureLength);% setup frame-size
+AXI4_ADC_CaptureLength(DDR4_ReadLen);% setup frame-size
 % DDR4 Read settings
 AXI4_DDR4_ReadFrameLen(DDR4_ReadLen); 
 AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
@@ -212,8 +212,8 @@ AXI4_DDR4_ReadTrigger(false); % do not trigger
 AXI4_CPILength(initObjects.registerConfig.pulses_per_cpi);
 AXI4_PulseWidth(initObjects.registerConfig.pulse_width_cycles);
 AXI4_PRI(initObjects.registerConfig.pri_cycles);
-AXI4_RngGateDelay(RngGateDelay_count);
-AXI4_RngSwathLength(RngSwathLength_count);
+AXI4_RngGateDelay(initObjects.registerConfig.tx_end_to_rx_start_delay_cycles);
+AXI4_RngSwathLength(initObjects.registerConfig.range_swath_cycles);
 
 %% Capture loop
 disp('Close the scope to stop the example...');
@@ -229,7 +229,7 @@ while ~done
   
     % Perform shared mem retreival
 
-    data_rd_1 = rd(0,CaptureLength*8); % read 2 gigs out, 8 or how many int16 samples in 128
+    data_rd_1 = rd(0,DDR4_ReadLen*8); % read 2 gigs out, 8 or how many int16 samples in 128
 
     % Unpack data from word-ordering in memory 
     % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)

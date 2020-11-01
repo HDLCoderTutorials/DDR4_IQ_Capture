@@ -23,6 +23,10 @@ classdef RegisterConfig < handle & pl_config.Validator
         range_swath_cycles {mustBeInteger}  % receive_time_cycles - alternate name.
         % after_rx_pri_delay_cycles - entire PRI interval
         after_rx_pri_delay_cycles {mustBeInteger}
+        % tx_end_to_rx_start_delay_cycles - Gap between end of tx and start
+        % of rx, in fpga cycles.  Gives redundant information with 
+        % pulse_width_cycles and rx_delay_cycles.
+        tx_end_to_rx_start_delay_cycles {mustBeInteger}
         % samples_per_clock_cycle - Samples processed per clock cycle.
         samples_per_clock_cycle  {mustBeInteger, mustBeGreaterThan(samples_per_clock_cycle,0)}
         start_inc_steps {mustBeInteger} % Initial NCO LFM increment
@@ -32,6 +36,15 @@ classdef RegisterConfig < handle & pl_config.Validator
         % lfm_counter_inc gives the increment rate for the phase increment 
         % to describe a Linear Frequency Modulation (LFM)
         lfm_counter_inc {mustBeInteger}
+        % ddr4_samples - number of samples to read from shared memory
+        % this depends on whether the PL and PS data types match, how many 
+        % samples per fpga cycle, and how many channels are packed in the
+        % stream.
+        ddr4_samples {mustBeInteger}
+        % ddr4_data_type - data type to read from ddr4 memory.  The size of
+        % the data type is important, since memory will be travesed faster
+        % with larger data types.
+        ddr4_data_type = 'int16'
         
     end
 
@@ -46,7 +59,7 @@ classdef RegisterConfig < handle & pl_config.Validator
 
         function valid = isValid(obj)
             %isValid validate before using on FPGA radar
-            valid = obj.allPropertiesAreSingletonAndDefined;
+            valid = obj.allPropertiesAreSingletonAndDefined('exclude','ddr4_data_type');
         end
 
     end

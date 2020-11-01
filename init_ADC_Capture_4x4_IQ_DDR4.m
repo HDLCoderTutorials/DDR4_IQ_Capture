@@ -27,15 +27,15 @@ RngSwathLength = 4*PulseWidth * 1.25; % time in seconds of RX data to save each 
 %% CHIRP parameters
 
 % requiredVars{end+1} = 'PulseWidth_count';
-PulseWidth_count = PulseWidth*fpga_clk_rate;
+% PulseWidth_count = PulseWidth*fpga_clk_rate;
 
-requiredVars{end+1} = 'RngGateDelay_count';
+% requiredVars{end+1} = 'RngGateDelay_count';
 RngGateDelay_count =RngGateDelay*fpga_clk_rate; % seconds 
-requiredVars{end+1} = 'RngSwathLength_count';
+% requiredVars{end+1} = 'RngSwathLength_count';
 RngSwathLength_count = RngSwathLength*fpga_clk_rate; % seconds * clocks per sec = fpga clock cycles
 
-requiredVars{end+1} = 'CaptureLength';
-CaptureLength = CPILength*RngSwathLength_count; % pulse_count * fpgaClockCycle_count
+% requiredVars{end+1} = 'CaptureLength';
+% CaptureLength = CPILength*RngSwathLength_count; % pulse_count * fpgaClockCycle_count
 
 
 %% Cleanup parameters, testing to see which parameters are required.
@@ -69,17 +69,16 @@ initObjects = initialize.initializeObjects();
 % N = initObjects.synthesisConfig.N_accumulator; % all over slx,
 % PRI_count = initObjects.registerConfig.pri_cycles;
 % PulseWidth_count = initObjects.registerConfig.pulse_width_cycles;
-RngGateDelay_count = initObjects.registerConfig.rx_delay_cycles ...
-    - initObjects.registerConfig.pulse_width_cycles;
+% RngGateDelay_count = initObjects.registerConfig.tx_end_to_rx_start_delay_cycles;
 
 % Seems redundant with CaptureLength... what was the difference?
-RngSwathLength_count = initObjects.registerConfig.range_swath_cycles;
+% RngSwathLength_count = initObjects.registerConfig.range_swath_cycles;
 % What are CaptureLength's units?  fpga cycles? Samples?  IDK...
-CaptureLength        = initObjects.registerConfig.range_swath_cycles ...
-    * initObjects.radarSetup.pulses_per_cpi; % Read.m, 
-start_inc = initObjects.registerConfig.start_inc_steps; % compare values?
-end_inc = initObjects.registerConfig.end_inc_steps; % compare values?
-LFM_counter_inc = initObjects.registerConfig.lfm_counter_inc; % Calculation seems to match
+% CaptureLength        = initObjects.registerConfig.range_swath_cycles ...
+%     * initObjects.radarSetup.pulses_per_cpi; % Read.m, 
+% start_inc = initObjects.registerConfig.start_inc_steps; % compare values?
+% end_inc = initObjects.registerConfig.end_inc_steps; % compare values?
+% LFM_counter_inc = initObjects.registerConfig.lfm_counter_inc; % Calculation seems to match
 
 
 %% DDR plant model param - might be acceptable, should be in a structure
@@ -94,7 +93,7 @@ DDR.InitData = fi(zeros(1,DDR.Depth),DDR.DataType);
 % with simulation specific changes.
 % Simulation specific parameters are fine, but they should be passed in 
 % through a uniform interface, instead of being another random global var.
-sim_CaptureLength = CaptureLength;
+sim_CaptureLength = initObjects.registerConfig.ddr4_samples;
 sim_RdFrameSize = 64;
 sim_RdNumFrames = ceil(sim_CaptureLength/sim_RdFrameSize);
 

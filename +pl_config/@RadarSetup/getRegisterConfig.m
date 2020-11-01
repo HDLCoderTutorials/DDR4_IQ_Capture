@@ -32,6 +32,7 @@ rcIn.rx_delay_cycles = ...
 rcIn.range_swath_cycles = ...
     round( (obj.range_swath_m/obj.c + obj.pulse_width_sec) * clock_hz);
 rcIn.after_rx_pri_delay_cycles = rcIn.pri_cycles - rcIn.pulse_width_cycles - rcIn.rx_delay_cycles;
+rcIn.tx_end_to_rx_start_delay_cycles = rcIn.rx_delay_cycles - rcIn.pulse_width_cycles;
 rcIn.samples_per_clock_cycle = sc.samples_per_clock_cycle;
 rcIn.pulses_per_cpi = obj.pulses_per_cpi; % pulses_per_cpi is copied right from RadarSetup
 
@@ -54,6 +55,13 @@ fprintf('%.0fMHz %.0fMHz\n', obj.chirp_start_frequency_hz/1e6, ...
     end_inc_actual_MHz);
 
 
+
+%% DDR4 stuff
+% Value copied from original script, but not really understood.
+rcIn.ddr4_samples = rcIn.range_swath_cycles * obj.pulses_per_cpi;
+rcIn.ddr4_data_type = 'int16';
+
+
 % Create and validate register config object
 register_config = pl_config.RegisterConfig(rcIn);
 assert(register_config.isValid(),'Radar Programable Logic Configuration object is not valid')
@@ -66,8 +74,10 @@ if(areParametersRounded)
     disp(rounded)
 end
 
-% [mapStruct mapCell] = mapParameters();
+% end of main function.
+%% Local Function Definitions
 
+% [mapStruct mapCell] = mapParameters();
 
 
     function [mapStruct, mapCell] = mapParameters()
@@ -150,8 +160,6 @@ end
     % Self Validation
     % Inputs property names must members of RadarSetup or RegisterConfig
     % Conversion functions must be inverse functions of one another.
-
-
 
     end
 
