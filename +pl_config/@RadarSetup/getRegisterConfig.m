@@ -7,9 +7,8 @@ function register_config = getRegisterConfig(obj)
 %
 % Generate and populate pl_config.RegisterConfig object
 
-warning(['getRegisterConfig calculations are NOT complete. Proof of concept only.',...
-    'Note that all values must be rounded to integers,',...
-    ' but it would be good to account for rounding errors somewhere.'])
+warning(['Note that all RegisterConfig values must be rounded to integers,',...
+    ' but it would be good to account for rounding errors.'])
 % A dedicated Validator.round method might be helpful which both rounds to
 % the nearest integer AND records the rounding error, and possibly back
 % modifies the source properties to match the integer rounding.
