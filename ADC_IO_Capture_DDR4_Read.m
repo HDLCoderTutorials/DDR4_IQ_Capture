@@ -21,238 +21,283 @@ DebugMode = 0;
 
 rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType',initObjects.registerConfig.ddr4_data_type);
 
+scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen);
+writeAXI = setupWriteRegistes(IPAddr);
+[readAXI, DiagnosticRd] = setupReadRegisters(IPAddr);
+setup_axi_objects(writeAXI,readAXI);
+% axiStructSetup(readAXI)
+% axiStructSetup(writeAXI)
+% writeAXI.AXI4_NCO_DAC_I_Gain.setup(fi(0,numerictype('ufix8_En7'))); 
+% writeAXI.AXI4_NCO_DAC_Q_Gain.setup(fi(0,numerictype('ufix8_En7'))); 
+initializeRegisters(DebugMode,initObjects);
+
+data_rd_1 = captureLoop()
+
+
 %% Scopes
+function scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen)
 
-if DebugMode
-    YScale = [-DDR4_ReadLen*2, DDR4_ReadLen*2];
-else
-    YScale = [-3500, 3500];
+    if DebugMode
+        YScale = [-DDR4_ReadLen*2, DDR4_ReadLen*2];
+    else
+        YScale = [-3500, 3500];
+    end
+    hScope = dsp.TimeScope(1, initObjects.synthesisConfig.sample_rate_hz,...
+                        'TimeSpanSource', 'Auto', ...
+                        'AxesScaling', 'Manual',...
+                        'YLimits', YScale,...
+                        'LayoutDimensions', [1 1]);
+    hSpecAn = dsp.SpectrumAnalyzer( ...
+                        'SampleRate', initObjects.synthesisConfig.sample_rate_hz);
+    hSpecAn.FrequencyResolutionMethod = 'Windowlength';
+    hSpecAn.PlotMaxHoldTrace = false;
+    hSpecAn.PlotNormalTrace = true;
+    % Capturelength/CPILength is the first pulse, just look at first 4
+    hSpecAn.WindowLength = DDR4_ReadLen/initObjects.radarSetup.pulses_per_cpi*4; 
+    hSpecAn.Window = 'Rectangular';
+    hSpecAn.ViewType  = 'Spectrum and spectrogram'
+
+    %These 4 lines capture the scope or spectrum analyzer plots closing so we
+    %can punt out of while loop with done=true
+    frmWrk = hScope.getFramework;
+    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
+    frmWrk = hSpecAn.getFramework;
+    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
+    
+    scopeStruct = utilities.v2struct();
+
 end
-hScope = dsp.TimeScope(1, initObjects.synthesisConfig.sample_rate_hz,...
-                    'TimeSpanSource', 'Auto', ...
-                    'AxesScaling', 'Manual',...
-                    'YLimits', YScale,...
-                    'LayoutDimensions', [1 1]);
-hSpecAn = dsp.SpectrumAnalyzer( ...
-                    'SampleRate', initObjects.synthesisConfig.sample_rate_hz);
-hSpecAn.FrequencyResolutionMethod = 'Windowlength';
-hSpecAn.PlotMaxHoldTrace = false;
-hSpecAn.PlotNormalTrace = true;
-% Capturelength/CPILength is the first pulse, just look at first 4
-hSpecAn.WindowLength = DDR4_ReadLen/initObjects.radarSetup.pulses_per_cpi*4; 
-hSpecAn.Window = 'Rectangular';
-hSpecAn.ViewType  = 'Spectrum and spectrogram'
-
-%These 4 lines capture the scope or spectrum analyzer plots closing so we
-%can punt out of while loop with done=true
-frmWrk = hScope.getFramework;
-addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
-frmWrk = hSpecAn.getFramework;
-addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
 
 %% AXI4 MM IIO Write registers
-AXI4_ADC_SelectCh =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('11C')); 
-AXI4_CPIStart =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('100')); 
-AXI4_DebugCaptureRegister =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('108')); 
-AXI4_ADC_CaptureLength =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('104')); 
-AXI4_DDR4_ReadFrameLen =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('10C')); 
-AXI4_DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('110')); 
-AXI4_DDR4_ReadTrigger =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('114')); 
-AXI4_CPILength =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('120')); 
-AXI4_PulseWidth =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('124')); 
-AXI4_PRI =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('128')); 
-AXI4_RngGateDelay =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('12C')); 
-AXI4_NCO_incr =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('118')); 
-AXI4_NCO_DAC_I_Gain =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('130')); 
-AXI4_NCO_DAC_Q_Gain =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('134')); 
-AXI4_NCO_end_incr =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('138')); 
-AXI4_NCO_step_value =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('140')); 
-AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('13C')); 
+
+function write = setupWriteRegistes(IPAddr)
+
+    AXI4_ADC_SelectCh =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('11C')); 
+    AXI4_CPIStart =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('100')); 
+    AXI4_DebugCaptureRegister =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('108')); 
+    AXI4_ADC_CaptureLength =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('104')); 
+    AXI4_DDR4_ReadFrameLen =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('10C')); 
+    AXI4_DDR4_ReadAddress =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('110')); 
+    AXI4_DDR4_ReadTrigger =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('114')); 
+    AXI4_CPILength =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('120')); 
+    AXI4_PulseWidth =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('124')); 
+    AXI4_PRI =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('128')); 
+    AXI4_RngGateDelay =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('12C')); 
+    AXI4_NCO_incr =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('118')); 
+    AXI4_NCO_DAC_I_Gain =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('130')); 
+    AXI4_NCO_DAC_Q_Gain =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('134')); 
+    AXI4_NCO_end_incr =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('138')); 
+    AXI4_NCO_step_value =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('140')); 
+    AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
+                       'IPAddress',IPAddr,...
+                       'AddressOffset',hex2dec('13C')); 
+
+    write = utilities.v2struct();               
+end
 
 
 %% AXI4 MM IIO Read debug registers
-AXI4_S2MM_TreadyLowCount = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('140'),...
-                 'DataType','uint32');
-AXI4_AXI4S_TlastCheck = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('134'),...
-                 'DataType','int32');
-AXI4_FIFOCapture_Overflow = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('138'),...
-                 'DataType','uint32');
-AXI4_FIFODMA_Overflow = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('13C'),...
-                 'DataType','uint32');
-AXI4_WriteCompleteCount = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('144'),...
-                 'DataType','uint32');
-AXI4_ReadCompleteCount = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('148'),...
-                 'DataType','uint32');
-AXI4_AccumulatedWrRdyCount = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('14C'),...
-                 'DataType','uint32');
-AXI4_WastedWriteCycles = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('150'),...
-                 'DataType','uint32');
-AXI4_AckLow_Count = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('154'),...
-                 'DataType','uint32');
-AXI4_CaptureFIFONum = pspshared.libiio.aximm.read(...
-                 'IPAddress',IPAddr,...
-                 'AddressOffset',hex2dec('158'),...
-                 'DataType','uint32');
-clear DiagnosticRd;
-DiagnosticRd.S2MM_TreadyLowCount = {AXI4_S2MM_TreadyLowCount ,'TReadyLow Count = %d \n'};
-DiagnosticRd.AXI4S_TlastCheck = {AXI4_AXI4S_TlastCheck, 'TlastCheck  : %d (If ~= 0 then DMA transaction is broken) \n'};
-DiagnosticRd.FIFOCapture_Overflow = {AXI4_FIFOCapture_Overflow, 'Samples thrown on the floor (lost): %d (If > 0 then data was lost in capture)  \n'};
-DiagnosticRd.FIFODMA_Overflow = {AXI4_FIFODMA_Overflow, 'DMA FIFO Almost Full Count :  %d (If >0 if AXI4-Stream DMA exerted backpressure. \n This does NOT necessarily mean that data was lost)  \n'};
-DiagnosticRd.WriteCompleteCount = {AXI4_WriteCompleteCount, 'WriteCompleteCount = %d \n'};
-DiagnosticRd.ReadCompleteCount= {AXI4_ReadCompleteCount,'ReadCompleteCount = %d \n'};
-DiagnosticRd.AccumulatedWrRdyCount = {AXI4_AccumulatedWrRdyCount, 'Accumulated !write-ready count = %d \n'};
-DiagnosticRd.WastedWriteCycles = {AXI4_WastedWriteCycles, 'Wasted write-cycles (increments) = %d \n'};
-DiagnosticRd.AckLow_Count = {AXI4_AckLow_Count, 'FIFO Ack Backpressure count= %d \n'};
-DiagnosticRd.CaptureFIFONum = {AXI4_CaptureFIFONum, 'FIFO Num value = %d \n'};
+function [read, DiagnosticRd] = setupReadRegisters(IPAddr)
+    AXI4_S2MM_TreadyLowCount = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('140'),...
+                     'DataType','uint32');
+    AXI4_AXI4S_TlastCheck = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('134'),...
+                     'DataType','int32');
+    AXI4_FIFOCapture_Overflow = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('138'),...
+                     'DataType','uint32');
+    AXI4_FIFODMA_Overflow = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('13C'),...
+                     'DataType','uint32');
+    AXI4_WriteCompleteCount = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('144'),...
+                     'DataType','uint32');
+    AXI4_ReadCompleteCount = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('148'),...
+                     'DataType','uint32');
+    AXI4_AccumulatedWrRdyCount = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('14C'),...
+                     'DataType','uint32');
+    AXI4_WastedWriteCycles = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('150'),...
+                     'DataType','uint32');
+    AXI4_AckLow_Count = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('154'),...
+                     'DataType','uint32');
+    AXI4_CaptureFIFONum = pspshared.libiio.aximm.read(...
+                     'IPAddress',IPAddr,...
+                     'AddressOffset',hex2dec('158'),...
+                     'DataType','uint32');
+    clear DiagnosticRd;
+    DiagnosticRd.S2MM_TreadyLowCount = {AXI4_S2MM_TreadyLowCount ,'TReadyLow Count = %d \n'};
+    DiagnosticRd.AXI4S_TlastCheck = {AXI4_AXI4S_TlastCheck, 'TlastCheck  : %d (If ~= 0 then DMA transaction is broken) \n'};
+    DiagnosticRd.FIFOCapture_Overflow = {AXI4_FIFOCapture_Overflow, 'Samples thrown on the floor (lost): %d (If > 0 then data was lost in capture)  \n'};
+    DiagnosticRd.FIFODMA_Overflow = {AXI4_FIFODMA_Overflow, 'DMA FIFO Almost Full Count :  %d (If >0 if AXI4-Stream DMA exerted backpressure. \n This does NOT necessarily mean that data was lost)  \n'};
+    DiagnosticRd.WriteCompleteCount = {AXI4_WriteCompleteCount, 'WriteCompleteCount = %d \n'};
+    DiagnosticRd.ReadCompleteCount= {AXI4_ReadCompleteCount,'ReadCompleteCount = %d \n'};
+    DiagnosticRd.AccumulatedWrRdyCount = {AXI4_AccumulatedWrRdyCount, 'Accumulated !write-ready count = %d \n'};
+    DiagnosticRd.WastedWriteCycles = {AXI4_WastedWriteCycles, 'Wasted write-cycles (increments) = %d \n'};
+    DiagnosticRd.AckLow_Count = {AXI4_AckLow_Count, 'FIFO Ack Backpressure count= %d \n'};
+    DiagnosticRd.CaptureFIFONum = {AXI4_CaptureFIFONum, 'FIFO Num value = %d \n'};
 
-
+    read = utilities.v2struct();
+end
 %% Setup() AXI4 MM IIO Objects
-% NOTE: These are placeholder values. Please update this section according to your design
 
-% Setup AXI4MM Read IIO objects
-setup(AXI4_S2MM_TreadyLowCount); 
-setup(AXI4_AXI4S_TlastCheck); 
-setup(AXI4_FIFOCapture_Overflow); 
-setup(AXI4_FIFODMA_Overflow); 
-setup(AXI4_WriteCompleteCount); 
-setup(AXI4_ReadCompleteCount); 
-setup(AXI4_AccumulatedWrRdyCount); 
-setup(AXI4_WastedWriteCycles); 
-setup(AXI4_AckLow_Count); 
-setup(AXI4_CaptureFIFONum); 
-% Setup AXI4MM Write IIO objects
-setup(AXI4_ADC_SelectCh,uint32(0)); 
-setup(AXI4_CPIStart,boolean(0)); 
-setup(AXI4_DebugCaptureRegister,boolean(0)); 
-setup(AXI4_ADC_CaptureLength,uint32(0)); 
-setup(AXI4_DDR4_ReadFrameLen,uint32(0)); 
-setup(AXI4_DDR4_ReadAddress,uint32(0)); 
-setup(AXI4_DDR4_ReadTrigger,boolean(0)); 
-setup(AXI4_CPILength,uint32(0)); 
-setup(AXI4_PulseWidth,uint32(0)); 
-setup(AXI4_PRI,uint32(0)); 
-setup(AXI4_RngGateDelay,uint32(0)); 
-setup(AXI4_NCO_incr,int32(0)); 
-setup(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
-setup(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
-setup(AXI4_NCO_end_incr,int32(0)); 
-setup(AXI4_NCO_step_value,int32(0)); 
-setup(AXI4_RngSwathLength,uint32(0));
+function axiStructSetup(axiObjectStruct)
+    % Initialize to zero, datatype = ?
+    axiNames = fieldnames(axiObjectStruct);    
+    for iName = 1:numel(axiNames)
+        axiObjectStruct.(axiNames{iName}).setup(0);
+    end
+end
+
+function setup_axi_objects(writeStruct,readStruct)
+    % Bad form, dumping structure contents to function workspace.
+    utilities.v2struct(writeStruct);
+    utilities.v2struct(readStruct);
+    
+    % NOTE: These are placeholder values. Please update this section according to your design
+
+    % Setup AXI4MM Read IIO objects
+    setup(AXI4_S2MM_TreadyLowCount); 
+    setup(AXI4_AXI4S_TlastCheck); 
+    setup(AXI4_FIFOCapture_Overflow); 
+    setup(AXI4_FIFODMA_Overflow); 
+    setup(AXI4_WriteCompleteCount); 
+    setup(AXI4_ReadCompleteCount); 
+    setup(AXI4_AccumulatedWrRdyCount); 
+    setup(AXI4_WastedWriteCycles); 
+    setup(AXI4_AckLow_Count); 
+    setup(AXI4_CaptureFIFONum); 
+    % Setup AXI4MM Write IIO objects
+    setup(AXI4_ADC_SelectCh,uint32(0)); 
+    setup(AXI4_CPIStart,boolean(0)); 
+    setup(AXI4_DebugCaptureRegister,boolean(0)); 
+    setup(AXI4_ADC_CaptureLength,uint32(0)); 
+    setup(AXI4_DDR4_ReadFrameLen,uint32(0)); 
+    setup(AXI4_DDR4_ReadAddress,uint32(0)); 
+    setup(AXI4_DDR4_ReadTrigger,boolean(0)); 
+    setup(AXI4_CPILength,uint32(0)); 
+    setup(AXI4_PulseWidth,uint32(0)); 
+    setup(AXI4_PRI,uint32(0)); 
+    setup(AXI4_RngGateDelay,uint32(0)); 
+    setup(AXI4_NCO_incr,int32(0)); 
+    setup(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
+    setup(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
+    setup(AXI4_NCO_end_incr,int32(0)); 
+    setup(AXI4_NCO_step_value,int32(0)); 
+    setup(AXI4_RngSwathLength,uint32(0));
+end
 
 %% Step() AXI4 MM IIO Objects - non-zero initial values
-% Channel Select
-step(AXI4_ADC_SelectCh,0); 
-% NCO values 
-AXI4_NCO_incr(initObjects.registerConfig.start_inc_steps);
-AXI4_NCO_end_incr(initObjects.registerConfig.end_inc_steps);
-AXI4_NCO_step_value(initObjects.registerConfig.lfm_counter_inc);
+function initializeRegisters(DebugMode,initObjects)
+    % Channel Select
+    step(AXI4_ADC_SelectCh,0); 
+    % NCO values 
+    AXI4_NCO_incr(initObjects.registerConfig.start_inc_steps);
+    AXI4_NCO_end_incr(initObjects.registerConfig.end_inc_steps);
+    AXI4_NCO_step_value(initObjects.registerConfig.lfm_counter_inc);
 
-AXI4_NCO_DAC_I_Gain(1);
-AXI4_NCO_DAC_Q_Gain(1);
+    AXI4_NCO_DAC_I_Gain(1);
+    AXI4_NCO_DAC_Q_Gain(1);
 
-AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
-AXI4_ADC_CaptureLength(DDR4_ReadLen);% setup frame-size
-% DDR4 Read settings
-AXI4_DDR4_ReadFrameLen(DDR4_ReadLen); 
-AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
-AXI4_DDR4_ReadTrigger(false); % do not trigger
-% Radar parameters
-AXI4_CPILength(initObjects.registerConfig.pulses_per_cpi);
-AXI4_PulseWidth(initObjects.registerConfig.pulse_width_cycles);
-AXI4_PRI(initObjects.registerConfig.pri_cycles);
-AXI4_RngGateDelay(initObjects.registerConfig.tx_end_to_rx_start_delay_cycles);
-AXI4_RngSwathLength(initObjects.registerConfig.range_swath_cycles);
+    AXI4_DebugCaptureRegister(DebugMode); %  0 - will use default ADC data, 1 - will use counter values
+    AXI4_ADC_CaptureLength(DDR4_ReadLen);% setup frame-size
+    % DDR4 Read settings
+    AXI4_DDR4_ReadFrameLen(DDR4_ReadLen); 
+    AXI4_DDR4_ReadAddress(0); %offset in bytes of where we read from DDR4. NOTE: Since this is a 128-bit signal the stride is 16 bytes
+    AXI4_DDR4_ReadTrigger(false); % do not trigger
+    % Radar parameters
+    AXI4_CPILength(initObjects.registerConfig.pulses_per_cpi);
+    AXI4_PulseWidth(initObjects.registerConfig.pulse_width_cycles);
+    AXI4_PRI(initObjects.registerConfig.pri_cycles);
+    AXI4_RngGateDelay(initObjects.registerConfig.tx_end_to_rx_start_delay_cycles);
+    AXI4_RngSwathLength(initObjects.registerConfig.range_swath_cycles);
+end
 
 %% Capture loop
-disp('Close the scope to stop the example...');
-done = false;
-frameIdx = 0;
-ToneUpdateRate = 5; % Change tone every 40 frames
-prevLostSampleCount = 0;
+function data_rd_1 = captureLoop()
+    disp('Close the scope to stop the example...');
+    done = false;
+    frameIdx = 0;
+    ToneUpdateRate = 5; % Change tone every 40 frames
+    prevLostSampleCount = 0;
 
-while ~done
-   
-   AXI4_CPIStart(1);
-   AXI4_CPIStart(0);
-  
-    % Perform shared mem retreival
+    while ~done
 
-    data_rd_1 = rd(0,DDR4_ReadLen*8); % read 2 gigs out, 8 or how many int16 samples in 128
+       AXI4_CPIStart(1);
+       AXI4_CPIStart(0);
 
-    % Unpack data from word-ordering in memory 
-    % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
-    % will no longer work
-    temp = reshape(data_rd_1, 4, []);
-    data_i = reshape(temp(:,1:2:end),[],1);
-    data_q = reshape(temp(:,2:2:end),[],1);
-    data = complex(data_i,data_q);
-    
-   
-    hScope(data); % Plot data
-   
-    hSpecAn(data); % Plot freq response
-    frameIdx = frameIdx + 1;
-   
-    PrintDiagnostics(DiagnosticRd)
-    
-% 	pause(1);
+        % Perform shared mem retreival
+
+        data_rd_1 = rd(0,DDR4_ReadLen*8); % read 2 gigs out, 8 or how many int16 samples in 128
+
+        % Unpack data from word-ordering in memory 
+        % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
+        % will no longer work
+        temp = reshape(data_rd_1, 4, []);
+        data_i = reshape(temp(:,1:2:end),[],1);
+        data_q = reshape(temp(:,2:2:end),[],1);
+        data = complex(data_i,data_q);
+
+
+        hScope(data); % Plot data
+
+        hSpecAn(data); % Plot freq response
+        frameIdx = frameIdx + 1;
+
+        PrintDiagnostics(DiagnosticRd)
+
+    % 	pause(1);
+    end
+    %return
+
+    release(rd) %releases shared memory object reader
+    % StreamEn(0) % disable stream
 end
-%return
-
-release(rd) %releases shared memory object reader
-% StreamEn(0) % disable stream
 
 function PrintDiagnostics(DiagnosticRd)
     disp('------------- Diagnostic Read -------------')
