@@ -31,7 +31,7 @@ classdef (Abstract) Validator < handle
             props = properties(obj);
             if ~ismember(propertyName,props) % property not found
                 singleton = false;
-                if showErros; warning([propertyName,' is not a member of this class.']); end
+                if showErrors; warning([propertyName,' is not a member of this class.']); end
             else
                 % propertyValue = obj.(propertyName);
                 if ~obj.isPropertyDefined(propertyName,showErrors) % property not defined
