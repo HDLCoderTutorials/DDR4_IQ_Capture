@@ -1,9 +1,7 @@
-
 clear
 init_ADC_Capture_4x4_IQ_DDR4
 %% Common Params
 IPAddr = 'ip:192.168.1.101';
-
 DDR4_ReadLen = initObjects.registerConfig.ddr4_samples;
 
 % Debug mode:
@@ -19,10 +17,10 @@ DebugMode = 0;
 %                   'Timeout',0);
 % setup(AXI4SReadObj);
 
-rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType',initObjects.registerConfig.ddr4_data_type);
+rd_sharedmem = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType',initObjects.registerConfig.ddr4_data_type);
 
 scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen);
-isDone = scopeStruct.isDone; % Placing reference in base workspace
+% isDone = scopeStruct.isDone; % Placing reference in base workspace
 writeAXI = setupWriteRegistes(IPAddr);
 [readAXI, DiagnosticRd] = setupReadRegisters(IPAddr);
 setup_axi_objects(writeAXI,readAXI);
@@ -31,16 +29,13 @@ setup_axi_objects(writeAXI,readAXI);
 % writeAXI.AXI4_NCO_DAC_I_Gain.setup(fi(0,numerictype('ufix8_En7'))); 
 % writeAXI.AXI4_NCO_DAC_Q_Gain.setup(fi(0,numerictype('ufix8_En7')));
 
-
 initializeRegisters(struct('DebugMode',DebugMode,'initObjects',initObjects,...
     'writeAXI',writeAXI,'DDR4_ReadLen',DDR4_ReadLen));
 
-
 data_rd_1 = captureLoop(struct('AXI4_CPIStart',writeAXI.AXI4_CPIStart,...
-    'DDR4_ReadLen',DDR4_ReadLen,'rd',rd,'DiagnosticRd',DiagnosticRd,...
+    'DDR4_ReadLen',DDR4_ReadLen,'rd',rd_sharedmem,'DiagnosticRd',DiagnosticRd,...
     'hScope',scopeStruct.hScope,'hSpecAn',scopeStruct.hSpecAn,...
     'isDone',scopeStruct.isDone));
-
 
 %% Scopes
 function scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen)
@@ -68,12 +63,22 @@ function scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen)
     %These 4 lines capture the scope or spectrum analyzer plots closing so we
     %can punt out of while loop with done=true
     isDone = utilities.Reference(false);
+
     frmWrk = hScope.getFramework;
-    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'isDone.value=true;'));
+    addlistener(frmWrk.Parent,'Close', @setIsDone);
     frmWrk = hSpecAn.getFramework;
-    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'isDone.value=true;'));
+    addlistener(frmWrk.Parent,'Close', @setIsDone);
     
     scopeStruct = utilities.v2struct();
+    
+    function setIsDone(src,event)
+        % local function holds reference to the local variables, 
+        % including the isDone Reference object.  This allows the 
+        % callback  to @setIsDone to modify the variable in THIS context
+        % rather than using evalin('base',@(~,~)'isDone.value=true') which 
+        % requires isDone to be in the base workspace.
+        isDone.value = true;
+    end    
 
 end
 
@@ -195,11 +200,11 @@ function [read, DiagnosticRd] = setupReadRegisters(IPAddr)
 end
 %% Setup() AXI4 MM IIO Objects
 
-function axiStructSetup(axiObjectStruct)
+function axiStructSetup(axiStruct)
     % Initialize to zero, datatype = ?
-    axiNames = fieldnames(axiObjectStruct);    
+    axiNames = fieldnames(axiStruct);    
     for iName = 1:numel(axiNames)
-        axiObjectStruct.(axiNames{iName}).setup(0);
+        axiStruct.(axiNames{iName}).setup(0);
     end
 end
 
@@ -287,7 +292,6 @@ function data_rd_1 = captureLoop(inputStruct)
        AXI4_CPIStart(0);
 
         % Perform shared mem retreival
-
         data_rd_1 = rd(0,DDR4_ReadLen*8); % read 2 gigs out, 8 or how many int16 samples in 128
 
         % Unpack data from word-ordering in memory 
@@ -300,7 +304,6 @@ function data_rd_1 = captureLoop(inputStruct)
 
 
         hScope(data); % Plot data
-
         hSpecAn(data); % Plot freq response
         frameIdx = frameIdx + 1;
 
