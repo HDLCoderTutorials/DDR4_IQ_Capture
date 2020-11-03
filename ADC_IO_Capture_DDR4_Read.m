@@ -22,16 +22,24 @@ DebugMode = 0;
 rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType',initObjects.registerConfig.ddr4_data_type);
 
 scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen);
+isDone = scopeStruct.isDone; % Placing reference in base workspace
 writeAXI = setupWriteRegistes(IPAddr);
 [readAXI, DiagnosticRd] = setupReadRegisters(IPAddr);
 setup_axi_objects(writeAXI,readAXI);
 % axiStructSetup(readAXI)
 % axiStructSetup(writeAXI)
 % writeAXI.AXI4_NCO_DAC_I_Gain.setup(fi(0,numerictype('ufix8_En7'))); 
-% writeAXI.AXI4_NCO_DAC_Q_Gain.setup(fi(0,numerictype('ufix8_En7'))); 
-initializeRegisters(DebugMode,initObjects);
+% writeAXI.AXI4_NCO_DAC_Q_Gain.setup(fi(0,numerictype('ufix8_En7')));
 
-data_rd_1 = captureLoop()
+
+initializeRegisters(struct('DebugMode',DebugMode,'initObjects',initObjects,...
+    'writeAXI',writeAXI,'DDR4_ReadLen',DDR4_ReadLen));
+
+
+data_rd_1 = captureLoop(struct('AXI4_CPIStart',writeAXI.AXI4_CPIStart,...
+    'DDR4_ReadLen',DDR4_ReadLen,'rd',rd,'DiagnosticRd',DiagnosticRd,...
+    'hScope',scopeStruct.hScope,'hSpecAn',scopeStruct.hSpecAn,...
+    'isDone',scopeStruct.isDone));
 
 
 %% Scopes
@@ -59,10 +67,11 @@ function scopeStruct = setupScopes(DebugMode,initObjects,DDR4_ReadLen)
 
     %These 4 lines capture the scope or spectrum analyzer plots closing so we
     %can punt out of while loop with done=true
+    isDone = utilities.Reference(false);
     frmWrk = hScope.getFramework;
-    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
+    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'isDone.value=true;'));
     frmWrk = hSpecAn.getFramework;
-    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'done=true;'));
+    addlistener(frmWrk.Parent,'Close', @(~,~)evalin('base', 'isDone.value=true;'));
     
     scopeStruct = utilities.v2struct();
 
@@ -233,7 +242,10 @@ function setup_axi_objects(writeStruct,readStruct)
 end
 
 %% Step() AXI4 MM IIO Objects - non-zero initial values
-function initializeRegisters(DebugMode,initObjects)
+function initializeRegisters(inputStruct)
+    utilities.v2struct(inputStruct);    
+    utilities.v2struct(writeAXI);
+
     % Channel Select
     step(AXI4_ADC_SelectCh,0); 
     % NCO values 
@@ -259,14 +271,17 @@ function initializeRegisters(DebugMode,initObjects)
 end
 
 %% Capture loop
-function data_rd_1 = captureLoop()
+function data_rd_1 = captureLoop(inputStruct)
+    utilities.v2struct(inputStruct)
     disp('Close the scope to stop the example...');
-    done = false;
+    
+    assert(isa(isDone,'utilities.Reference'),'isDone Reference object not present in local workspace.')
+    isDone.value = false;
     frameIdx = 0;
     ToneUpdateRate = 5; % Change tone every 40 frames
     prevLostSampleCount = 0;
 
-    while ~done
+    while ~isDone.value
 
        AXI4_CPIStart(1);
        AXI4_CPIStart(0);
