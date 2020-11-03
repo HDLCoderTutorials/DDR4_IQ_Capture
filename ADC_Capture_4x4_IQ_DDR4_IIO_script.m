@@ -51,6 +51,9 @@ AXI4_PRI =  pspshared.libiio.aximm.write(...
 AXI4_RngGateDelay =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('12C')); 
+AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
+                   'IPAddress',IPAddr,...
+                   'AddressOffset',hex2dec('13C')); 
 AXI4_NCO_incr =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('118')); 
@@ -66,9 +69,6 @@ AXI4_NCO_end_incr =  pspshared.libiio.aximm.write(...
 AXI4_NCO_step_value =  pspshared.libiio.aximm.write(...
                    'IPAddress',IPAddr,...
                    'AddressOffset',hex2dec('140')); 
-AXI4_RngSwathLength =  pspshared.libiio.aximm.write(...
-                   'IPAddress',IPAddr,...
-                   'AddressOffset',hex2dec('13C')); 
 
 
 %% AXI4 MM IIO Read registers
@@ -140,12 +140,12 @@ setup(AXI4_CPILength,uint32(0));
 setup(AXI4_PulseWidth,uint32(0)); 
 setup(AXI4_PRI,uint32(0)); 
 setup(AXI4_RngGateDelay,uint32(0)); 
+setup(AXI4_RngSwathLength,uint32(0)); 
 setup(AXI4_NCO_incr,int32(0)); 
 setup(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
 setup(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
 setup(AXI4_NCO_end_incr,int32(0)); 
 setup(AXI4_NCO_step_value,int32(0)); 
-setup(AXI4_RngSwathLength,uint32(0)); 
 
 
 %% Step() AXI4 MM IIO Objects
@@ -174,9 +174,9 @@ setup(AXI4_RngSwathLength,uint32(0));
 % step(AXI4_PulseWidth,uint32(0)); 
 % step(AXI4_PRI,uint32(0)); 
 % step(AXI4_RngGateDelay,uint32(0)); 
+% step(AXI4_RngSwathLength,uint32(0)); 
 % step(AXI4_NCO_incr,int32(0)); 
 % step(AXI4_NCO_DAC_I_Gain,fi(0,numerictype('ufix8_En7'))); 
 % step(AXI4_NCO_DAC_Q_Gain,fi(0,numerictype('ufix8_En7'))); 
 % step(AXI4_NCO_end_incr,int32(0)); 
 % step(AXI4_NCO_step_value,int32(0)); 
-% step(AXI4_RngSwathLength,uint32(0)); 
