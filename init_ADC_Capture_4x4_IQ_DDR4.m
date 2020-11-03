@@ -3,10 +3,10 @@ clearvars
 % DDC_DUC_factor = 4;
 
 %% OOP Initialization
-initObjects = initialize.Presets.originalScript;
-initObjects.radarSetup.plot;
+initObjects = initialize.original_140MHz_chirp;
+% initObjects.radarSetup.plot;
 initObjects.radarSetup
-initObjects.radarSetup.getRadarPerformance
+% initObjects.radarSetup.getRadarPerformance
 
 %% DDR plant model param - might be acceptable, should be in a structure
 DDR.DataWidth = 128;
