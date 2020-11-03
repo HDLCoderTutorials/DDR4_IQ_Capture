@@ -7,15 +7,16 @@
 clear
 
 % Creates a DATA vector from 1 to 1000; this is the devName (name of IIO device):
-dataLength = 100;
-CaptureLength = dataLength*8;
-% DATA = (1:dataLength);
-DATA = zeros(1,dataLength);
-% DATA = rand(1,dataLength);
+dataLength = 1000;
+CaptureLength = dataLength; % how many samples you want to pull out. 
+DATA = int16(1:dataLength);
+%DATA = zeros(1,dataLength);
+%DATA = rand(1,dataLength);
 
 AddressOffset = 0;
 % Address which is the starting address offset:
 IPAddr = 'ip:192.168.1.101';
+% 
 rd = pspshared.libiio.sharedmem.read('IPAddress',IPAddr,'DataType','int16');
 wr = pspshared.libiio.sharedmem.write('IPAddress',IPAddr);
 
@@ -48,7 +49,7 @@ title('Output Data')
 
 %% Cleanup
 release(rd) %releases shared memory object reader
-
+release(wr) % releases shared memory objct reader
 %{
 % AXI4 MM IIO Write registers
 AXI4_ADC_SelectCh =  pspshared.libiio.aximm.write(...
