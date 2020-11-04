@@ -10,13 +10,12 @@ function output = runHardware()
     % If successful, this will cause a reboot.
     %evalin('base','hdlworkflow_ProgramTargetDevice')
     try
-        error('test error')
         z.ProgramRFSoC('ModelName','ADC_Capture_4x4_IQ_DDR4')
     catch ME        
         warning(ME.message)
         warning('z.ProgramRFSoC() command failed, reverting to hdlworkflow_ProgramTargetDevice()')
         % For compatability with Sean's installation.
-        hdlworkflowStruct = hdlworkflow_ProgramTargetDevice();    
+        hdlworkflowStruct = utilities.hdlworkflow_ProgramTargetDevice();    
     end
             
 
@@ -24,7 +23,8 @@ function output = runHardware()
     %% Setup Board Mixers/Data Converter after boot, Use timer to wait
     isBooted.value = false;
     retriesLeft = 3;
-    retryPeriod = 8;        
+    startDelay = 35;
+    retryPeriod = 10;        
     
     function testIfBooted(src,event)
         booted = verifyBoardIsBooted(ipaddress,z);
@@ -42,11 +42,11 @@ function output = runHardware()
         isBooted.value = booted; 
     end
     
-    t = timer('StartFcn',@(~,~)disp('timer started.'),...
+    t = timer('StartFcn',@(~,~)disp(['Timer started. Attemping reconnect in ',num2str(startDelay),' seconds.']),...
         'TimerFcn',@testIfBooted,...
         'ExecutionMode','fixedSpacing',...
         'period',retryPeriod,...
-        'StartDelay',5);           
+        'StartDelay',startDelay);           
     start(t)
     
     while isBooted.value == false
@@ -55,7 +55,7 @@ function output = runHardware()
         
     % After boot, setup RF Data Converter mixers, etc.
     % Function wrapper for generated script
-    mixerOutputStruct = HDL_IP_setup_rfsoc_fcn();
+    mixerOutputStruct = utilities.HDL_IP_setup_rfsoc_fcn();
     disp('Bitstream loaded, board rebooted, RFTool run.');
     disp('Startup Complete.')
     
@@ -66,7 +66,7 @@ function isBootVerified = verifyBoardIsBooted(ipaddress,zynqRfObject)
     isBootVerified = false;
     %% Test Ping
     disp(['Attempting to ping IP: ',ipaddress]);
-    [~,pingOutput] = system(['ping ',ipaddress],'-echo');
+    [~,pingOutput] = system(['ping ',ipaddress, ' -n 1'],'-echo');
     
     regexp1 = 'Received\s=\s(?<received>\d+)';
     pingParse = regexp(pingOutput, regexp1,'names');        

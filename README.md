@@ -2,6 +2,9 @@
 
 
 #### Running on RFSoC
+
+
+Manual Board Boot:
 ```
 !ping 192.168.1.101
 z = zynqrf; z.checkConnection
@@ -9,11 +12,17 @@ z.ProgramRFSoC('ModelName','ADC_Capture_4x4_IQ_DDR4')
 HDL_IP_setup_rfsoc
 ADC_IO_Capture_DDR4_Read
 ```
+Alternatively, the first four commands and the required delays between them 
+can be automated with `utilities.runHardware();` then followed by 
+`ADC_IO_Capture_DDR4_Read` to begin streaming from the hardware.   
 
+<hr>
 
 #### To Do
 - [x] Initialize LFS - run `git lfs install` on the CLI or setup LFS in GitKraken
-- [x] Peruse Model
+- [x] Implement Object Oriented Initialization m-files
+- [ ] Support all OOP Radar parameters in slx model
+- [ ] Transmit arbitrary waveform from DDR4
 - [x] Read [Simplified AXI4 Master Interface](https://www.mathworks.com/help/soc/ug/model-design-for-axi4-master-interface-generation.html)
 - [x] Read [Model Design for AXI4-Stream Interface Generation](https://www.mathworks.com/help/supportpkg/xilinxzynq7000/ug/model-design-for-axi4-stream-interface-generation.html)  
 
