@@ -67,9 +67,8 @@ end
 
 
 function writeReg = setupWriteRegisters(IPAddr,DebugMode,DDR4_ReadLen,initObjects)
-
-% Name,Adr,Type,InitialValue
-WriteNameAdrTypeValue_cell = {...
+columnNames = {'Name','Address','DataType','InitialValue'};
+    WriteNameAdrTypeValue_cell = {...
     'ADC_SelectCh',hex2dec('11C'),uint32(0),0;...
     'CPIStart',hex2dec('100'),boolean(0),false;...
     'DebugCaptureRegister',hex2dec('108'),boolean(0),DebugMode;...
@@ -88,26 +87,24 @@ WriteNameAdrTypeValue_cell = {...
     'NCO_step_value',hex2dec('140'),int32(0),initObjects.registerConfig.lfm_counter_inc;...
     'RngSwathLength',hex2dec('13C'),uint32(0),initObjects.registerConfig.range_swath_cycles;...
     };
+tableWR = array2table(WriteNameAdrTypeValue_cell,'VariableNames',columnNames);
 
-
-    for iWriteReg = 1:size(WriteNameAdrTypeValue_cell,1)
-        writeReg.(WriteNameAdrTypeValue_cell{iWriteReg,1}) = ...
+    for iReg = 1:size(tableWR,1)
+        writeReg.(tableWR.Name{iReg}) = ...
             pspshared.libiio.aximm.write(...
                 'IPAddress',IPAddr,...
-                 'AddressOffset',WriteNameAdrTypeValue_cell{iWriteReg,2});
+                 'AddressOffset',tableWR.Address{iReg});
     % setup register data type
-        setup(writeReg.(WriteNameAdrTypeValue_cell{iWriteReg,1}),...
-            (WriteNameAdrTypeValue_cell{iWriteReg,3}));
+        setup(writeReg.(tableWR.Name{iReg}), tableWR.DataType{iReg});
     % initialize register value
-        step(writeReg.(WriteNameAdrTypeValue_cell{iWriteReg,1}),...
-            WriteNameAdrTypeValue_cell{iWriteReg,4});
+        step(writeReg.(tableWR.Name{iReg}), tableWR.InitialValue{iReg});
     end
     
 end
 
 
 function [readReg, DiagnosticRd] = setupReadRegisters(IPAddr)
-
+columnNames = {'Name','Address','DataType'};
     ReadNameAdrType_cell = {...
     'S2MM_TreadyLowCount',hex2dec('140'),'uint32';...
     'AXI4S_TlastCheck',hex2dec('134'),'int32';...
@@ -118,16 +115,18 @@ function [readReg, DiagnosticRd] = setupReadRegisters(IPAddr)
     'AccumulatedWrRdyCount',hex2dec('14C'),'uint32';...
     'WastedWriteCycles',hex2dec('150'),'uint32';...
     'AckLow_Count',hex2dec('154'),'uint32';...
-    'CaptureFIFONum',hex2dec('158'),'uint32'};
+    'CaptureFIFONum',hex2dec('158'),'uint32';...
+    };
+tableRD = array2table(ReadNameAdrType_cell,'VariableNames',columnNames);
 
     readReg = [];
-    for iReadReg = 1:size(ReadNameAdrType_cell,1)
-        readReg.(ReadNameAdrType_cell{iReadReg,1}) = ...
+    for iReg = 1:size(tableRD,1)
+        readReg.(tableRD.Name{iReg}) = ...
             pspshared.libiio.aximm.read(...
                 'IPAddress',IPAddr,...
-                 'AddressOffset',ReadNameAdrType_cell{iReadReg,2},...
-                 'DataType',ReadNameAdrType_cell{iReadReg,3});
-        readReg.(ReadNameAdrType_cell{iReadReg,1}).setup();
+                 'AddressOffset',tableRD.Address{iReg},...
+                 'DataType',tableRD.DataType{iReg});
+        readReg.(tableRD.Name{iReg}).setup();
     end
 
     DiagnosticRd.S2MM_TreadyLowCount = {readReg.S2MM_TreadyLowCount ,'TReadyLow Count = %d \n'};
@@ -140,7 +139,6 @@ function [readReg, DiagnosticRd] = setupReadRegisters(IPAddr)
     DiagnosticRd.WastedWriteCycles = {readReg.WastedWriteCycles, 'Wasted write-cycles (increments) = %d \n'};
     DiagnosticRd.AckLow_Count = {readReg.AckLow_Count, 'FIFO Ack Backpressure count= %d \n'};
     DiagnosticRd.CaptureFIFONum = {readReg.CaptureFIFONum, 'FIFO Num value = %d \n'};
-
 end
 
 
@@ -160,7 +158,7 @@ function data_rd_1 = captureLoop(inputStruct)
        AXI4_CPIStart(0);
 
         % Perform shared mem retreival
-        data_rd_1 = rd(0,DDR4_ReadLen*8); % read 2 gigs out, 8 or how many int16 samples in 128
+        data_rd_1 = rd(0,DDR4_ReadLen*8);
 
         % Unpack data from word-ordering in memory 
         % (set in ADC_Capture_4x4_IQ_DDR4/HDL_IP/DDR_Capture_Logic/DataBusBreakout)
@@ -170,17 +168,12 @@ function data_rd_1 = captureLoop(inputStruct)
         data_q = reshape(temp(:,2:2:end),[],1);
         data = complex(data_i,data_q);
 
-
         hScope(data); % Plot data
         hSpecAn(data); % Plot freq response
         frameIdx = frameIdx + 1;
-
         PrintDiagnostics(DiagnosticRd)
-
     % 	pause(1);
     end
-    %return
-
     release(rd) %releases shared memory object reader
     % StreamEn(0) % disable stream
 end
