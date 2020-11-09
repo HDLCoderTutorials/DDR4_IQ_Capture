@@ -18,6 +18,9 @@ can be automated with `utilities.runHardware();` then followed by
 
 <hr>
 
+Note: Some Diagnostics have been supressed to avoid unhelpful warnings.
+To view supressed diagnostics, use `Simulink.getSuppressedDiagnostics(bdroot)`
+
 #### To Do
 - [x] Initialize LFS - run `git lfs install` on the CLI or setup LFS in GitKraken
 - [x] Implement Object Oriented Initialization m-files
@@ -28,6 +31,18 @@ can be automated with `utilities.runHardware();` then followed by
 
 <hr>
 
+### +utilities package
+To quickly find all MATLAB Function Blocks in the Simulink model, 
+use ```utilities.SimulinkSearch.getFunctionBlocks();```
+
+To get an array of all input and output ports on a Simulink block, highlight the block, then 
+run ```utilities.SimulinkSearch.getBlockPorts()```  
+
+
+  
+    
+<hr>
+        
 ##### Markdown
 * [Markdown Syntax Guide](https://guides.github.com/features/mastering-markdown/)
 * [Markdown offline viewer Chrome Extension](https://chrome.google.com/webstore/detail/markdown-preview-plus/febilkbfcbhebfnokafefeacimjdckgl)  
@@ -41,5 +56,6 @@ This repository is setup to allow Git LFS to manage the ~33MB bit file generated
 **Quick Start**  
 On the CLI run `git lfs install` and you are done.  
 Or in GitKraken, click File > Preferences > LFS then press "Initialize LFS on this repo."  
+
 
 
