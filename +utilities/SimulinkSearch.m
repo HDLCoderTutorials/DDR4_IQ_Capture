@@ -50,7 +50,7 @@ classdef SimulinkSearch
     end
     
     
-    function output = getFunctionBlocks(systemPath)
+    function output = getFunctionBlocks(systemPath,searchUnderMasks)
         % Return cell array of paths to all function paths in given systemPath.
         % If no systemPath is given, then the entire model is searched.
         % Also displays links to the found function blocks.
@@ -59,8 +59,17 @@ classdef SimulinkSearch
             systemPath = bdroot; % gcs is selected system, bdroot is top level
             disp(['No systemPath argument given, using current selected block:  ',systemPath])
         end
-                
-        find_mat_fn = find_system(systemPath,'BlockType','SubSystem'); % finding Subsytem
+        
+        if not(exist('searchUnderMasks','var') == 1)
+            searchUnderMasks = false; % default is graphical, which will look under some masks.
+        end
+        
+        if searchUnderMasks == true
+            maskString = 'on';
+        else
+            maskString = 'graphical';
+        end
+        find_mat_fn = find_system(systemPath,'LookUnderMasks',maskString,'BlockType','SubSystem'); % finding Subsytem
         mat_fn = {' Demux ';'Ground';' SFunction ';' Terminator '}; % default parameter for Matlab Function Block
         mat_blk_name = 1;
         for i = 1 : length(find_mat_fn)
